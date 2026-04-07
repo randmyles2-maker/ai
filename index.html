@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Universal AI Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: #eee; padding: 20px; }
+        .card { background: #2a2a2a; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid #007bff; }
+        #timestamp { color: #888; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>Universal Intelligence Feed</h1>
+    <p id="timestamp">Last Sync: Loading...</p>
+    <div id="content">Waiting for data from laptop...</div>
+
+    <script>
+        // Fetches the data file your laptop uploaded to the repo
+        async function loadData() {
+            const res = await fetch('data.json');
+            const data = await res.json();
+            document.getElementById('timestamp').innerText = "Last Sync: " + data.last_updated;
+            
+            let html = "";
+            data.updates.forEach(item => {
+                html += `<div class="card"><h3>${item.domain}</h3><p>${item.content}</p></div>`;
+            });
+            document.getElementById('content').innerHTML = html;
+        }
+        setInterval(loadData, 30000); // Check for updates every 30 seconds
+        loadData();
+    </script>
+</body>
+</html>
