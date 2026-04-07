@@ -1,0 +1,19 @@
+name: 10-Minute Knowledge Sync
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Runs every 10 minutes
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Sync
+        run: |
+          python core/orchestrator.py --oneshot
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'UniversalAI-Bot'
+          git add .
+          git commit -m "Auto-update knowledge"
+          git push
