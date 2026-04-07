@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Universal Intelligence Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
+        .header { border-bottom: 1px solid #30363d; padding-bottom: 20px; margin-bottom: 20px; text-align: center; }
+        .status-tag { background: #238636; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8em; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: #58a6ff; }
+        .domain-label { font-weight: bold; color: #58a6ff; text-transform: uppercase; font-size: 0.75em; }
+        .timestamp { color: #8b949e; font-size: 0.8em; float: right; }
+        .math-text { font-family: 'Courier New', Courier, monospace; color: #aff5b4; background: #000; padding: 2px 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Universal AI <span class="status-tag">Live Sync</span></h1>
+        <p id="last-sync">Last updated: Loading...</p>
+    </div>
+
+    <div class="grid" id="main-feed">
+        </div>
+
+    <script>
+        async function fetchKnowledge() {
+            try {
+                const response = await fetch('data.json?t=' + new Date().getTime()); // Prevent caching
+                const data = await response.json();
+                document.getElementById('last-sync').innerText = "Last Database Sync: " + data.last_updated;
+                
+                const feed = document.getElementById('main-feed');
+                feed.innerHTML = data.updates.map(item => `
+                    <div class="card">
+                        <span class="timestamp">${item.time}</span>
+                        <div class="domain-label">${item.domain}</div>
+                        <h3>${item.title}</h3>
+                        <p>${item.content}</p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.log("Waiting for laptop to push first data.json...");
+            }
+        }
+        setInterval(fetchKnowledge, 60000); // Refresh every minute
+        fetchKnowledge();
+    </script>
+</body>
+</html>
