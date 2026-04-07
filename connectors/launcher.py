@@ -1,35 +1,43 @@
-import threading
 import os
 import time
+import json
 import subprocess
 from datetime import datetime
 
-def run_api():
-    """Starts the FastAPI server for instant website interaction."""
-    print("🚀 Starting Live API Node...")
-    os.system("python api_node.py")
+def check_for_requests():
+    # 1. Pull latest changes from GitHub
+    subprocess.run(["git", "pull", "origin", "main"])
 
-def run_sync_loop():
-    """Syncs 'All Knowledge' to GitHub every 10 minutes."""
-    while True:
-        print(f"[{datetime.now()}] Gathering science, math, and history data...")
-        # Simulate data gathering
-        # In your real setup, call your sync_engine.py logic here
+    # 2. Check if the website dropped a request file
+    if os.path.exists("request.txt"):
+        with open("request.txt", "r") as f:
+            query = f.read()
         
-        try:
-            subprocess.run(["git", "add", "."], check=True)
-            subprocess.run(["git", "commit", "-m", "Auto-update knowledge"], check=True)
-            subprocess.run(["git", "push", "origin", "main"], check=True)
-            print("✅ GitHub Dashboard Updated.")
-        except Exception as e:
-            print(f"❌ Sync failed: {e}")
-            
-        time.sleep(600)
+        print(f"Processing Query: {query}")
+        
+        # 3. Simple Math/Science Logic (built-in)
+        answer = f"Laptop processed '{query}' at {datetime.now()}"
+        
+        # 4. Update data.json
+        with open("data.json", "r") as f:
+            data = json.load(f)
+        
+        data["updates"].insert(0, {"domain": "AI Response", "content": answer, "time": "Just Now"})
+        
+        with open("data.json", "w") as f:
+            json.dump(data, f, indent=4)
+
+        # 5. Cleanup and Push
+        os.remove("request.txt")
+        subprocess.run(["git", "add", "data.json", "request.txt"])
+        subprocess.run(["git", "commit", "-m", "AI Answered Query"])
+        subprocess.run(["git", "push", "origin", "main"])
+        return True
+    return False
 
 if __name__ == "__main__":
-    # Start API in background thread
-    api_thread = threading.Thread(target=run_api, daemon=True)
-    api_thread.start()
-    
-    # Start Sync loop in main thread
-    run_sync_loop()
+    print("AI Laptop Node: Watching GitHub for requests...")
+    while True:
+        did_work = check_for_requests()
+        # If no request, wait 30 seconds. If worked, wait 10 mins.
+        time.sleep(30 if not did_work else 600)
