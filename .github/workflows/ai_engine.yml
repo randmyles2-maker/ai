@@ -10,42 +10,43 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Process Intelligence
+      - name: Generate Smart Response
         run: |
           python -c "
-          import json, os, datetime, random
+          import json, datetime, random, os
+
+          now = int(datetime.datetime.now().timestamp() * 1000)
           
-          # Initialize data if missing
-          if not os.path.exists('data.json'):
-              data = {'updates': []}
-          else:
+          # Load existing data
+          if os.path.exists('data.json'):
               with open('data.json', 'r') as f:
-                  try: data = json.load(f)
-                  except: data = {'updates': []}
+                  try: db = json.load(f)
+                  except: db = {'updates': []}
+          else:
+              db = {'updates': []}
 
-          # AI 'Chatty' Responses
-          replies = [
-              'I have updated my logic models based on our recent interactions.',
-              'My neural networks are currently processing global data streams.',
-              'System check: Online. I am analyzing the latest patterns in your requests.',
-              'Intelligence node active. Ready for the next phase of data ingestion.'
+          # The AI's conversational logic
+          responses = [
+              'I see you are testing my computational limits. Fascinating.',
+              'I am currently optimizing my neural pathways to better understand your requests.',
+              'Data ingestion complete. My core logic is now more refined.',
+              'Systems at 100%. I am standing by for further instructions.'
           ]
-
-          # Add new AI message
-          new_entry = {
-              'domain': 'AI',
-              'content': random.choice(replies),
-              'timestamp': int(datetime.datetime.now().timestamp() * 1000)
-          }
-          data['updates'].append(new_entry)
           
-          # Keep last 20 messages
-          data['updates'] = data['updates'][-20:]
+          # Simple Logic Check (Example: if user sent math)
+          # In a static setup, the AI 'anticipates' your needs
+          chosen_text = random.choice(responses)
+
+          # Add the AI bubble
+          db['updates'].append({'role': 'ai', 'text': chosen_text, 't': now})
+          
+          # Keep only the last 10 messages
+          db['updates'] = db['updates'][-10:]
 
           with open('data.json', 'w') as f:
-              json.dump(data, f, indent=4)
+              json.dump(db, f, indent=4)
           "
-      - name: Commit and Push
+      - name: Push to Main
         run: |
           git config --global user.name 'ai-bot'
           git config --global user.email 'bot@github.com'
