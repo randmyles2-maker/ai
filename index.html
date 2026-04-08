@@ -15,14 +15,14 @@
 <body>
     <div class="header">Intelligence Node</div>
     <div id="chat-flow">
-        <div class="msg">Initializing AI Link... Please wait for first sync.</div>
+        <div class="msg">System connecting... Checking for data sync.</div>
     </div>
     <script>
         async function update() {
             try {
                 const res = await fetch('data.json?t=' + Date.now());
                 const data = await res.json();
-                if (data.updates) {
+                if (data.updates && data.updates.length > 0) {
                     document.getElementById('chat-flow').innerHTML = data.updates.map(i => `
                         <div class="msg">
                             <div class="label">${i.domain} • ${i.time}</div>
@@ -30,9 +30,9 @@
                         </div>
                     `).join('');
                 }
-            } catch (e) { console.log("Syncing knowledge base..."); }
+            } catch (e) { console.log("Still waiting for data.json..."); }
         }
-        setInterval(update, 10000);
+        setInterval(update, 5000);
         update();
     </script>
 </body>
