@@ -10,23 +10,23 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Generate Content
+      - name: Generate Intelligence
         run: |
           python -c "
           import json, datetime
           now = datetime.datetime.now().strftime('%H:%M')
           data = {'updates': [
-              {'domain': 'MATH', 'time': now, 'content': 'Solved multi-variable vectors for spatial analysis.'},
+              {'domain': 'MATH', 'time': now, 'content': 'Calculated multi-variable vectors for spatial analysis.'},
               {'domain': 'SCIENCE', 'time': now, 'content': 'Retrieved latest research on solid-state physics.'},
               {'domain': 'HISTORY', 'time': now, 'content': 'Synced 2026 global event data to persistent memory.'}
           ]}
           with open('data.json', 'w') as f:
               json.dump(data, f)
           "
-      - name: Push to Main
+      - name: Push
         run: |
           git config --global user.name 'ai-bot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m 'Intelligence Sync' || exit 0
+          git commit -m 'sync' || exit 0
           git push
