@@ -7,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO UPLINK STABLE. SYSTEM READY.", "ai-msg");
+            this.addMessage("TRO NETWORK: Intelligence Uplink Active. Sourcing from verified global repositories.", "ai-msg");
         });
     }
 
@@ -24,24 +24,36 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        // Show initial loading state
-        const responseBubble = this.addMessage("ANALYZING...", "ai-msg");
+        const responseBubble = this.addMessage("SEARCHING REPOSITORIES...", "ai-msg");
         
-        // Actually fetch data
-        const result = await this.query(val);
+        // Execute the "Smarter" Search
+        const result = await this.smartQuery(val);
         
-        // Update the SAME bubble with the real answer
-        responseBubble.innerText = result;
+        responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async query(q) {
+    async smartQuery(q) {
         try {
-            const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
-            const data = await res.json();
-            return data.extract || "Command recognized but no external data found.";
+            // 1. Try Wikipedia for deep knowledge
+            const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+            const wikiData = await wikiRes.json();
+            
+            if (wikiData.extract && wikiData.type !== "disambiguation") {
+                return `<b>SOURCE: WIKIPEDIA</b><br>${wikiData.extract}`;
+            }
+
+            // 2. Fallback to DuckDuckGo for live/general facts
+            const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
+            const ddgData = await ddgRes.json();
+            
+            if (ddgData.AbstractText) {
+                return `<b>SOURCE: DUCKDUCKGO</b><br>${ddgData.AbstractText}`;
+            }
+
+            return "<b>NOTICE:</b> No verified source match found for this command.";
         } catch(e) {
-            return "ERROR: Uplink interrupted.";
+            return "<b>ERROR:</b> External uplink timed out.";
         }
     }
 
@@ -59,11 +71,14 @@ class TRONetwork {
     addMessage(content, type, isHTML = false) {
         const div = document.createElement('div');
         div.className = `bubble ${type}`;
-        isHTML ? div.innerHTML = content : div.innerText = content;
+        if (isHTML || content.includes('<br>')) {
+            div.innerHTML = content;
+        } else {
+            div.innerText = content;
+        }
         this.chatFlow.appendChild(div);
-        
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
-        return div; // Return the element so we can update it later
+        return div;
     }
 }
 new TRONetwork();
