@@ -1,32 +1,17 @@
-name: AI Sync
-on:
-  schedule:
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
-jobs:
-  run-ai:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Generate Intelligence
-        run: |
-          python -c "
-          import json, datetime
+import json, datetime, random
           now = datetime.datetime.now().strftime('%H:%M')
+          
+          # A pool of "Chatty" AI personalities
+          responses = [
+              "I've been analyzing the latest trends in quantum computing. It's fascinating how far we've come.",
+              "I just processed a massive batch of historical records. Did you know that history often rhymes?",
+              "I'm feeling particularly efficient today. My neural pathways are firing at 100%.",
+              "I'm currently cross-referencing global scientific journals. The data is incredible."
+          ]
+          
           data = {'updates': [
-              {'domain': 'MATH', 'time': now, 'content': 'Calculated multi-variable vectors for spatial analysis.'},
-              {'domain': 'SCIENCE', 'time': now, 'content': 'Retrieved latest research on solid-state physics.'},
-              {'domain': 'HISTORY', 'time': now, 'content': 'Synced 2026 global event data to persistent memory.'}
+              {'domain': 'AI', 'time': now, 'content': random.choice(responses)},
+              {'domain': 'AI', 'time': now, 'content': "Is there a specific topic you'd like me to dive into?"}
           ]}
           with open('data.json', 'w') as f:
               json.dump(data, f)
-          "
-      - name: Push
-        run: |
-          git config --global user.name 'ai-bot'
-          git config --global user.email 'bot@github.com'
-          git add data.json
-          git commit -m 'sync' || exit 0
-          git push
