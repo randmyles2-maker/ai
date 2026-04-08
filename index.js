@@ -1,3 +1,6 @@
+const OPENAI_API_KEY = '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';
+const API_URL = 'https://api.openai.com/v1/chat/completions';
+
 class TRONetwork {
     constructor() {
         this.chatFlow = document.getElementById('chat-flow');
@@ -7,7 +10,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO ACADEMIC: Connected to CORE, arXiv, and Open Access Repositories.", "ai-msg");
+            this.addMessage("TRO NETWORK: GPT-4o Uplink Established. System online.", "ai-msg");
         });
     }
 
@@ -24,55 +27,42 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        const responseBubble = this.addMessage("SCRAPING REPOSITORIES...", "ai-msg");
+        const responseBubble = this.addMessage("THINKING...", "ai-msg");
         
-        const isMath = /[0-9]/.test(val) && /[+\-*/^()]/.test(val);
-        if (isMath) {
-            try {
-                const result = Function('"use strict";return (' + val.replace(/[^-()\d/*+.]/g, '') + ')')();
-                responseBubble.innerHTML = `<b>MATH ENGINE</b><br>Result: ${result}`;
-                return;
-            } catch(e) {}
-        }
-
-        const cleanQuery = val.toLowerCase().replace(/whats|what is|who is|define|explain/g, "").trim();
-        const result = await this.researchSearch(cleanQuery, val);
+        const result = await this.askChatGPT(val);
         responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async researchSearch(q, raw) {
+    async askChatGPT(prompt) {
         try {
-            // Priority 1: arXiv / CORE style Search (Using a broader API for Research)
-            const researchRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
-            const data = await researchRes.json();
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        { role: "system", content: "You are TRO Network AI. Be concise for short questions and detailed for complex ones." },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
             
-            // Priority 2: DuckDuckGo (Unfiltered Web Results)
-            if (!data.extract || data.type === "disambiguation") {
-                const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
-                const ddgData = await ddgRes.json();
-                
-                if (ddgData.AbstractText) {
-                    return this.smartFormat("OPEN ACCESS REPOSITORY", ddgData.AbstractText, raw);
-                }
-                return "<b>DATABASE NOTICE:</b> No specific entry found in CORE or arXiv archives.";
-            }
-
-            return this.smartFormat("ACADEMIC DATABASE", data.extract, raw);
-        } catch(e) {
-            return "<b>UPLINK ERROR:</b> Repository connection failed.";
+            const text = data.choices[0].message.content;
+            
+            // Format response
+            return `<b>SOURCE: CHATGPT</b><br>${text.replace(/\n/g, '<br>')}`;
+        } catch (e) {
+            console.error(e);
+            return "<b>ERROR:</b> Uplink to ChatGPT failed. Check API Key or Credits.";
         }
-    }
-
-    smartFormat(source, text, original) {
-        // Intelligence: Short for basic, long for complex
-        const isComplex = original.split(' ').length > 4;
-        let content = text;
-        if (!isComplex) {
-            const sentences = text.split('. ');
-            content = sentences[0] + (sentences[1] ? '. ' + sentences[1] : '.');
-        }
-        return `<b>${source}</b><br>${content}`;
     }
 
     handlePhoto(event) {
