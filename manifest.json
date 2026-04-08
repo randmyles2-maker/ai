@@ -1,5 +1,5 @@
 {
-  "short_name": "TRO Network",
+  "short_name": "TRO",
   "name": "TRO Network Intelligence",
   "icons": [
     {
@@ -9,9 +9,9 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/ai/",
+  "start_url": "./index.html",
   "background_color": "#0a0b10",
   "display": "standalone",
-  "scope": "/ai/",
+  "scope": "./",
   "theme_color": "#00d2ff"
 }
