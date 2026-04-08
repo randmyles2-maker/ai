@@ -3,22 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Intelligence Node</title>
+    <title>Real-Time AI Node</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div id="app">
-        <header>
-            <h1>AI Node</h1>
-            <p>Guided by Ethics & Logic</p>
-        </header>
-        
-        <div id="chat-container">
-            <div class="msg ai">System Online. I am programmed to be helpful, ethical, and knowledgeable. How can I assist you today?</div>
+    <div id="app-container">
+        <div id="chat-window">
+            <div class="msg ai">System Online. Real-time data modules active. How can I help?</div>
         </div>
-
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Ask about math, science, or feelings..." onkeypress="if(event.key === 'Enter') sendMsg()">
+        <div class="input-bar">
+            <input type="text" id="user-input" placeholder="Ask about the weather or a fact..." onkeypress="if(event.key === 'Enter') sendMsg()">
             <button onclick="sendMsg()">Send</button>
         </div>
     </div>
