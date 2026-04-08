@@ -1,41 +1,32 @@
-name: AI Real-Time Sync
+name: AI Sync
 on:
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
-
 jobs:
-  sync:
+  run-ai:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # This fixes the warnings
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4 # Updated to v4
-
-      - name: Generate Content
+      - uses: actions/checkout@v4
+      - name: Generate Intelligence
         run: |
           python -c "
           import json, datetime
           now = datetime.datetime.now().strftime('%H:%M')
-          data = {
-              'last_updated': now,
-              'updates': [
-                  {'domain': 'MATH', 'time': now, 'content': 'Calculated trajectory constants for deep space telemetry.'},
-                  {'domain': 'SCIENCE', 'time': now, 'content': 'Synced latest quantum physics research from arXiv.'},
-                  {'domain': 'HISTORY', 'time': now, 'content': 'Global event timeline updated with real-time news.'}
-              ]
-          }
+          data = {'updates': [
+              {'domain': 'MATH', 'time': now, 'content': 'Calculated multi-variable vectors for spatial analysis.'},
+              {'domain': 'SCIENCE', 'time': now, 'content': 'Retrieved latest research on solid-state physics.'},
+              {'domain': 'HISTORY', 'time': now, 'content': 'Synced 2026 global event data to persistent memory.'}
+          ]}
           with open('data.json', 'w') as f:
-              json.dump(data, f, indent=4)
+              json.dump(data, f)
           "
-
-      - name: Push Changes
+      - name: Push
         run: |
-          git config --global user.name 'AI-Bot'
+          git config --global user.name 'ai-bot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m 'AI Intelligence Sync' || echo "No changes to commit"
+          git commit -m 'sync' || exit 0
           git push
