@@ -2,44 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRO Network | Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>TRO Network</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div id="tro-container">
+    <div id="app-wrapper">
         <aside id="sidebar">
-            <div class="logo">TRO <span>NETWORK</span></div>
-            <nav>
-                <div class="nav-item active">Main Terminal</div>
-                <div class="nav-item">Web Harvester</div>
-                <div class="nav-item">Social Hub</div>
-            </nav>
+            <div class="app-header">
+                <div class="logo">TRO <span>NETWORK</span></div>
+            </div>
             
-            <div class="sidebar-label">SAVED DATA</div>
-            <div id="saved-list">
-                </div>
+            <nav class="menu">
+                <div class="nav-btn active">TERMINAL</div>
+                <div class="nav-btn">HARVESTER</div>
+            </nav>
 
-            <div id="system-stats">
-                <p>CPU: 14%</p>
-                <p>Uplink: Secure</p>
+            <div class="storage-section">
+                <span class="label">DATABASE</span>
+                <div id="saved-list"></div>
+            </div>
+
+            <div class="sys-info">
+                <div class="stat"><span>UPLINK</span> <span class="val">ACTIVE</span></div>
+                <div class="stat"><span>LATENCY</span> <span class="val">14ms</span></div>
             </div>
         </aside>
 
-        <main id="main-terminal">
-            <header>
-                <div class="pulse"></div>
-                <h2>SYSTEM STATUS: OPTIMAL</h2>
-            </header>
+        <main id="stage">
+            <div id="chat-flow"></div>
             
-            <div id="chat-flow">
-                <div class="bubble ai-msg">TRO Network Initialized. Click any response to save it to your sidebar.</div>
+            <div class="input-container">
+                <div class="input-box">
+                    <input type="text" id="user-query" placeholder="Command..." autofocus>
+                    <button id="send-btn">➔</button>
+                </div>
             </div>
-
-            <footer class="input-area">
-                <input type="text" id="user-query" placeholder="Execute command..." autocomplete="off">
-                <button id="send-btn">SEND</button>
-            </footer>
         </main>
     </div>
     <script src="index.js"></script>
