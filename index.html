@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TRO Network">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
+    
     <title>TRO Network</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="index.css">
@@ -15,15 +19,14 @@
             <div class="logo">TRO <span>NETWORK</span></div>
             <nav class="menu">
                 <div class="nav-btn active">TERMINAL</div>
-                <div class="nav-btn">HARVESTER</div>
             </nav>
             <div class="storage-section">
                 <span class="label">DATABASE</span>
                 <div id="saved-list"></div>
             </div>
             <div class="sys-info">
-                <div class="stat"><span>UPLINK</span> <span class="val">ACTIVE</span></div>
-                <div class="stat"><span>LATENCY</span> <span class="val">14ms</span></div>
+                <div class="stat">UPLINK: ACTIVE</div>
+                <div class="stat">HW: IPHONE 12</div>
             </div>
         </aside>
 
@@ -31,7 +34,7 @@
             <div id="chat-flow"></div>
             <div class="input-container">
                 <div class="input-box">
-                    <input type="text" id="user-query" placeholder="Execute command..." autofocus>
+                    <input type="text" id="user-query" placeholder="Command..." autofocus autocomplete="off">
                     <button id="send-btn">➔</button>
                 </div>
             </div>
