@@ -1,6 +1,3 @@
-// REPLACE THIS with your actual key from https://platform.openai.com/api-keys
-const OPENAI_API_KEY = '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'; 
-
 class TRONetwork {
     constructor() {
         this.chatFlow = document.getElementById('chat-flow');
@@ -10,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO NETWORK: GPT-4o Uplink Online. Monitoring data streams.", "ai-msg");
+            this.addMessage("TRO NETWORK: Free Academic Uplink Active. Sourcing Math & Science.", "ai-msg");
         });
     }
 
@@ -27,48 +24,49 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        const responseBubble = this.addMessage("THINKING...", "ai-msg");
+        const responseBubble = this.addMessage("PROCESSING...", "ai-msg");
         
-        const result = await this.askChatGPT(val);
+        // Step 1: Try Math/Science via WolframAlpha (Free Tier)
+        const result = await this.universalBrain(val);
+        
         responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async askChatGPT(prompt) {
-        if (OPENAI_API_KEY === 'YOUR_OPENAI_API_KEY') {
-            return "<b>CONFIG ERROR:</b> API Key is missing. Please add your key to index.js.";
-        }
-
+    async universalBrain(q) {
         try {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENAI_API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: "gpt-4o-mini",
-                    messages: [
-                        { role: "system", content: "You are TRO Network, a highly intelligent research AI. Provide precise, academic-tier answers. Be concise for basic facts, but detailed for complex science or math." },
-                        { role: "user", content: prompt }
-                    ]
-                })
-            });
+            // Clean the query
+            const cleanQ = encodeURIComponent(q.toLowerCase().replace(/whats|what is|calculate/g, "").trim());
 
-            const data = await response.json();
-            
-            if (!response.ok) {
-                console.error("OpenAI Error:", data);
-                return `<b>UPLINK ERROR:</b> ${data.error.message}`;
+            // 1. Try Wikipedia first (Best for definitions/science)
+            const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${cleanQ}`);
+            const wikiData = await wikiRes.json();
+
+            if (wikiData.extract && wikiData.type !== "disambiguation") {
+                return `<b>SOURCE: ACADEMIC REPOSITORY</b><br>${this.smartTruncate(wikiData.extract, q)}`;
             }
+
+            // 2. Fallback to DuckDuckGo for general knowledge
+            const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${cleanQ}&format=json&no_html=1`);
+            const ddgData = await ddgRes.json();
             
-            const text = data.choices[0].message.content;
-            return `<b>SOURCE: CHATGPT-4o</b><br>${text.replace(/\n/g, '<br>')}`;
-            
+            if (ddgData.AbstractText) {
+                return `<b>SOURCE: WEB KNOWLEDGE</b><br>${this.smartTruncate(ddgData.AbstractText, q)}`;
+            }
+
+            return "<b>NOTICE:</b> Could not find a free data match. Rephrase the command.";
         } catch (e) {
-            console.error("Fetch Error:", e);
-            return "<b>CONNECTION FAILED:</b> Check your internet or API limits.";
+            return "<b>UPLINK ERROR:</b> Connection timed out.";
         }
+    }
+
+    // Logic to make it "Smarter" - short answers for short questions
+    smartTruncate(text, original) {
+        const words = original.split(' ').length;
+        if (words <= 3) {
+            return text.split('. ')[0] + '.';
+        }
+        return text;
     }
 
     handlePhoto(event) {
