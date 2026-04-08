@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
+    inputs:
+      user_query:
+        description: 'Type your question here to get a direct answer'
+        required: false
+        default: '24 * 2'
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 jobs:
@@ -12,28 +17,29 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Generate Smart Response
+      - name: AI Logic Engine
         run: |
           python -c "
           import json, os, datetime, re
 
-          def solve_logic(user_text):
-              user_text = user_text.lower().strip()
-              # 1. Try to solve Math
-              clean_math = re.sub(r'[^-+*/0-9.x ]', '', user_text.replace('x', '*'))
-              if clean_math and any(c in clean_math for c in '+-*/'):
-                  try: return f'The calculation result is: {eval(clean_math)}'
+          def solve(text):
+              text = text.lower().strip()
+              # MATH
+              math_clean = re.sub(r'[^-+*/0-9.x ]', '', text.replace('x', '*'))
+              if any(c in math_clean for c in '+-*/'):
+                  try: return f'The answer is: {eval(math_clean)}'
                   except: pass
               
-              # 2. Basic Chat Logic
-              if 'hello' in user_text or 'hi' in user_text:
-                  return 'Hello! I am online and ready to assist with data processing.'
-              if 'who are you' in user_text:
-                  return 'I am a Universal Intelligence Node powered by GitHub Actions.'
-              if 'time' in user_text:
-                  return f'My internal system clock is currently {datetime.datetime.now().strftime(\"%H:%M\")}.'
-              
-              return 'I have ingested your data and added it to my knowledge base. Ask me a math problem!'
+              # KNOWLEDGE BASE
+              kb = {
+                  'gravity': 'Gravity is 9.8m/s² on Earth.',
+                  'paris': 'Paris is the capital of France.',
+                  'hello': 'Hi! I am your AI Node. Ask me a math problem!',
+                  '2026': 'It is currently the year 2026.'
+              }
+              for k, v in kb.items():
+                  if k in text: return v
+              return 'Knowledge Ingested. Neural pathways optimized.'
 
           # Load Data
           if os.path.exists('data.json'):
@@ -43,24 +49,24 @@ jobs:
           else:
               db = {'updates': []}
 
-          # Get the last user message to respond to it
-          # Since the site uses localStorage, we look for messages without an 'AI' role
-          # In this simplified version, the AI reacts to the general state of the chat
-          last_text = 'Check' 
+          # Coordination: Use the manual input or a default
+          query = os.getenv('USER_QUERY', '24 * 2')
           
           now = int(datetime.datetime.now().timestamp() * 1000)
-          response_text = solve_logic(last_text)
+          response = solve(query)
 
-          db['updates'].append({'role': 'ai', 'text': response_text, 't': now})
+          db['updates'].append({'role': 'ai', 'text': response, 't': now})
           db['updates'] = db['updates'][-15:]
 
           with open('data.json', 'w') as f:
               json.dump(db, f, indent=4)
           "
-      - name: Push to Main
+        env:
+          USER_QUERY: ${{ github.event.inputs.user_query }}
+      - name: Push
         run: |
           git config --global user.name 'ai-bot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m 'AI Intelligence solved a query' || exit 0
+          git commit -m 'AI Intelligence Response' || exit 0
           git push
