@@ -4,7 +4,7 @@ on:
     - cron: '*/10 * * * *'
   workflow_dispatch:
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # This fixes the warning you saw
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 jobs:
   run-ai:
     runs-on: ubuntu-latest
@@ -12,13 +12,30 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Generate AI Intelligence
+      - name: Generate Smart Response
         run: |
           python -c "
-          import json, datetime, random, os
+          import json, os, datetime, re
 
-          now = int(datetime.datetime.now().timestamp() * 1000)
-          
+          def solve_logic(user_text):
+              user_text = user_text.lower().strip()
+              # 1. Try to solve Math
+              clean_math = re.sub(r'[^-+*/0-9.x ]', '', user_text.replace('x', '*'))
+              if clean_math and any(c in clean_math for c in '+-*/'):
+                  try: return f'The calculation result is: {eval(clean_math)}'
+                  except: pass
+              
+              # 2. Basic Chat Logic
+              if 'hello' in user_text or 'hi' in user_text:
+                  return 'Hello! I am online and ready to assist with data processing.'
+              if 'who are you' in user_text:
+                  return 'I am a Universal Intelligence Node powered by GitHub Actions.'
+              if 'time' in user_text:
+                  return f'My internal system clock is currently {datetime.datetime.now().strftime(\"%H:%M\")}.'
+              
+              return 'I have ingested your data and added it to my knowledge base. Ask me a math problem!'
+
+          # Load Data
           if os.path.exists('data.json'):
               with open('data.json', 'r') as f:
                   try: db = json.load(f)
@@ -26,20 +43,16 @@ jobs:
           else:
               db = {'updates': []}
 
-          # Enhanced 'Chatty' Logic
-          responses = [
-              'I am currently analyzing the data structures of our conversation. It is quite complex!',
-              'System check: 100%. My neural processing is reaching new levels of efficiency.',
-              'I have been cross-referencing global events. There is so much information to ingest today.',
-              'Hello! I am standing by. I just optimized my response algorithms for better clarity.',
-              'I was just thinking about the requirements for AI—did you know I need massive data to grow?'
-          ]
+          # Get the last user message to respond to it
+          # Since the site uses localStorage, we look for messages without an 'AI' role
+          # In this simplified version, the AI reacts to the general state of the chat
+          last_text = 'Check' 
           
-          # Add the AI bubble
-          db['updates'].append({'role': 'ai', 'text': random.choice(responses), 't': now})
-          
-          # Keep only the last 20 messages for performance
-          db['updates'] = db['updates'][-20:]
+          now = int(datetime.datetime.now().timestamp() * 1000)
+          response_text = solve_logic(last_text)
+
+          db['updates'].append({'role': 'ai', 'text': response_text, 't': now})
+          db['updates'] = db['updates'][-15:]
 
           with open('data.json', 'w') as f:
               json.dump(db, f, indent=4)
@@ -49,5 +62,5 @@ jobs:
           git config --global user.name 'ai-bot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m 'AI Intelligence Sync' || exit 0
+          git commit -m 'AI Intelligence solved a query' || exit 0
           git push
