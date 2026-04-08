@@ -1,42 +1,52 @@
 /**
- * TRO NETWORK - Integrated OS
- * Features: Math, Wiki, Weather, Finance, Social Hub, and Local Storage Persistence.
+ * TRO NETWORK - Integrated OS Engine
+ * Optimized for App-style Layout and Persistent Storage
  */
 
 class TRONetwork {
     constructor() {
+        // DOM References
         this.chatFlow = document.getElementById('chat-flow');
         this.input = document.getElementById('user-query');
         this.btn = document.getElementById('send-btn');
         this.savedList = document.getElementById('saved-list');
         
         this.init();
-        this.loadSavedData(); // Restores your sidebar on refresh
+        this.loadSavedData();
+
+        // APP INITIALIZATION GREETING
+        // This ensures the screen isn't black/empty when you first open the app
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                this.addMessage("TRO NETWORK: Neural link established. System status optimal. Database synchronized.", "ai-msg");
+            }, 500);
+        });
     }
 
     init() {
-        // App-style interaction: No page refreshes
+        // Handle User Input via Mouse or Enter Key
         this.btn.onclick = () => this.handleInput();
-        this.input.onkeydown = (e) => { 
+        
+        this.input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                e.preventDefault();
-                this.handleInput(); 
+                e.preventDefault(); // Prevents page refresh or focus loss
+                this.handleInput();
             }
-        };
+        });
     }
 
     async handleInput() {
         const val = this.input.value.trim();
         if (!val) return;
 
-        // 1. Immediate UI update
+        // 1. Post User Command
         this.addMessage(val, 'user-msg');
         this.input.value = '';
+
+        // 2. Initial Thinking State
+        const loaderId = this.addMessage('TRO System: Querying Repositories...', 'ai-msg loading');
         
-        // 2. Show processing state
-        const loaderId = this.addMessage('TRO System: Accessing Repositories...', 'ai-msg loading');
-        
-        // 3. Process through Logic Gates
+        // 3. Process Command
         const response = await this.processQuery(val);
         this.updateMessage(loaderId, response);
     }
@@ -44,41 +54,30 @@ class TRONetwork {
     async processQuery(query) {
         const q = query.toLowerCase().trim();
 
-        // --- GATE 1: SECURITY ---
-        if (/(hurt|kill|illegal|hack|steal|bomb|exploit)/.test(q)) {
-            return "SECURITY ALERT: Command blocked. Unethical parameters detected.";
-        }
-
-        // --- GATE 2: COMPUTATIONAL (MATH) ---
+        // Math Logic
         if (/[0-9]/.test(q) && /[+\-*/^()]/.test(q)) {
             return this.solveMath(q);
         }
 
-        // --- GATE 3: SENSORS (WEATHER/FINANCE) ---
+        // Live Data Logic
         if (q.includes("weather")) return await this.fetchWeather();
         if (q.includes("bitcoin") || q.includes("crypto")) return await this.fetchFinance();
 
-        // --- GATE 4: SOCIAL HUB ---
-        if (q.includes("trending") || q.includes("social")) {
-            return "SOCIAL HUB: Current global trends indicate a massive shift toward Decentralized AI and Quantum Encryption.";
-        }
-
-        // --- GATE 5: KNOWLEDGE (WIKIPEDIA) ---
+        // Knowledge Base Logic
         const wiki = await this.fetchWiki(query);
         if (wiki) return wiki;
 
-        // --- GATE 6: WEB HARVESTER (FALLBACK) ---
+        // Fallback Web Harvester
         return await this.fetchWeb(query);
     }
 
-    // --- LOGIC MODULES ---
+    // --- COMPUTATIONAL METHODS ---
 
     solveMath(q) {
         try {
-            const expression = q.replace(/x/g, '*').replace(/[^-()\d/*+.]/g, '');
-            const result = eval(expression);
-            return `COMPUTATION COMPLETE: Result is ${result}`;
-        } catch (e) { return "MATH ERROR: Malformed expression."; }
+            const result = eval(q.replace(/x/g, '*').replace(/[^-()\d/*+.]/g, ''));
+            return `COMPUTATION RESULT: ${result}`;
+        } catch (e) { return "COMPUTATION ERROR: Expression invalid."; }
     }
 
     async fetchWiki(q) {
@@ -99,8 +98,8 @@ class TRONetwork {
         try {
             const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
             const data = await res.json();
-            return data.AbstractText || "TRO NETWORK: No definitive data match in live repositories.";
-        } catch (e) { return "UPLINK ERROR: Web harvester timed out."; }
+            return data.AbstractText || "TRO NETWORK: No data match found in live repositories.";
+        } catch (e) { return "UPLINK ERROR: Connection failed."; }
     }
 
     async fetchWeather() {
@@ -115,14 +114,13 @@ class TRONetwork {
         return `MARKET INTEL: BTC $${data.bitcoin.usd.toLocaleString()} | ETH $${data.ethereum.usd.toLocaleString()}.`;
     }
 
-    // --- APP STATE & PERSISTENCE ---
+    // --- PERSISTENCE & SIDEBAR STORAGE ---
 
     saveData(text) {
-        // Save to LocalStorage so it works like an App
-        let saved = JSON.parse(localStorage.getItem('tro_storage') || '[]');
+        let saved = JSON.parse(localStorage.getItem('tro_db') || '[]');
         if (!saved.includes(text)) {
             saved.push(text);
-            localStorage.setItem('tro_storage', JSON.stringify(saved));
+            localStorage.setItem('tro_db', JSON.stringify(saved));
             this.renderSaved();
         }
     }
@@ -132,30 +130,32 @@ class TRONetwork {
     }
 
     renderSaved() {
-        const saved = JSON.parse(localStorage.getItem('tro_storage') || '[]');
-        // We reverse it so the newest saved item is on top
-        this.savedList.innerHTML = saved.reverse().map(item => 
+        const saved = JSON.parse(localStorage.getItem('tro_db') || '[]');
+        // We show the most recent saves at the top
+        this.savedList.innerHTML = saved.slice().reverse().map(item => 
             `<div class="saved-item" onclick="alert('${item.replace(/'/g, "\\'")}')">
-                ${item.substring(0, 35)}...
+                ${item.substring(0, 30)}...
              </div>`
         ).join('');
     }
 
-    // --- UI HELPERS ---
+    // --- INTERFACE HELPERS ---
 
     addMessage(text, type) {
         const div = document.createElement('div');
         div.className = `bubble ${type}`;
         div.innerText = text;
         
-        // App Feature: Click an AI message to save it to the sidebar
-        if(type.includes('ai-msg')) {
+        // Save functionality for AI responses
+        if (type.includes('ai-msg')) {
             div.style.cursor = "pointer";
-            div.title = "Click to save to Database";
+            div.title = "Save to Database";
             div.onclick = () => this.saveData(text);
         }
 
         this.chatFlow.appendChild(div);
+        
+        // Auto-scroll logic: ensures user always sees the newest message
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
         return div;
     }
@@ -167,5 +167,5 @@ class TRONetwork {
     }
 }
 
-// Power on the Network
+// Start TRO Engine
 new TRONetwork();
