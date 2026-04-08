@@ -24,7 +24,7 @@ class TRONetwork {
         this.input.value = '';
         
         setTimeout(() => {
-            this.addMessage("COMMAND PROCESSED.", "ai-msg");
+            this.addMessage("COMMAND RECEIVED. PROCESSING...", "ai-msg");
         }, 800);
     }
 
@@ -45,7 +45,6 @@ class TRONetwork {
         isHTML ? div.innerHTML = content : div.innerText = content;
         this.chatFlow.appendChild(div);
         
-        // Ensure it scrolls to the newest message
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 }
