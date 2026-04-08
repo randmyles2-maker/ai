@@ -7,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO INTELLIGENCE: Contextual Link Active. Optimized for efficiency.", "ai-msg");
+            this.addMessage("TRO UNIVERSAL INTELLIGENCE: Math, Science, and Fact-Check modules online.", "ai-msg");
         });
     }
 
@@ -26,41 +26,59 @@ class TRONetwork {
         
         const responseBubble = this.addMessage("...", "ai-msg");
         
-        // Smarter decision making based on word count
-        const wordCount = val.split(' ').length;
-        const result = await this.smartQuery(val, wordCount);
-        
+        // 1. Check if it's a Math Question
+        if (/[0-9]/.test(val) && /[+\-*/^()]/.test(val)) {
+            try {
+                // Basic math solver logic
+                const calculation = val.replace(/[^-()\d/*+.]/g, '');
+                const result = Function('"use strict";return (' + calculation + ')')();
+                responseBubble.innerHTML = `<b>MODULE: MATHEMATICS</b><br>Result: ${result}`;
+                return;
+            } catch(e) { /* Fallthrough to search if math fails */ }
+        }
+
+        // 2. Clean query for Science/Facts
+        const cleanQuery = val.toLowerCase()
+            .replace(/whats|what is|who is|define|how does|tell me about/g, "")
+            .trim();
+
+        const result = await this.universalSearch(cleanQuery, val.split(' ').length);
         responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async smartQuery(q, length) {
+    async universalSearch(q, length) {
         try {
+            // Priority 1: Wikipedia (Best for Science/History)
             const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
             const wikiData = await wikiRes.json();
             
-            let source = "WIKIPEDIA";
-            let content = wikiData.extract;
-
-            if (!content || wikiData.type === "disambiguation") {
-                const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
-                const ddgData = await ddgRes.json();
-                content = ddgData.AbstractText;
-                source = "DUCKDUCKGO";
+            if (wikiData.extract && wikiData.type !== "disambiguation") {
+                return this.formatResponse("KNOWLEDGE BASE", wikiData.extract, length);
             }
 
-            if (!content) return "<b>NOTICE:</b> Data point not found in verified repositories.";
-
-            // SMARTS: If user typed 3 words or less, summarize the response to 1-2 sentences.
-            if (length <= 3) {
-                const sentences = content.split('. ');
-                content = sentences[0] + (sentences[1] ? '. ' + sentences[1] : '.');
+            // Priority 2: DuckDuckGo (Best for general/quick questions)
+            const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
+            const ddgData = await ddgRes.json();
+            
+            if (ddgData.AbstractText) {
+                return this.formatResponse("WEB SOURCE", ddgData.AbstractText, length);
             }
 
-            return `<b>SOURCE: ${source}</b><br>${content}`;
+            return "<b>NOTICE:</b> Query remains outside known repositories. Rephrase for uplink.";
         } catch(e) {
-            return "<b>ERROR:</b> Intelligence uplink interrupted.";
+            return "<b>ERROR:</b> System Uplink Timeout.";
         }
+    }
+
+    formatResponse(source, text, length) {
+        let content = text;
+        // If query is 3 words or less, give a shorter, "smarter" answer
+        if (length <= 3) {
+            const sentences = text.split('. ');
+            content = sentences[0] + (sentences[1] ? '. ' + sentences[1] : '.');
+        }
+        return `<b>SOURCE: ${source}</b><br>${content}`;
     }
 
     handlePhoto(event) {
@@ -77,11 +95,7 @@ class TRONetwork {
     addMessage(content, type, isHTML = false) {
         const div = document.createElement('div');
         div.className = `bubble ${type}`;
-        if (isHTML || content.includes('<br>')) {
-            div.innerHTML = content;
-        } else {
-            div.innerText = content;
-        }
+        isHTML || content.includes('<br>') ? div.innerHTML = content : div.innerText = content;
         this.chatFlow.appendChild(div);
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
         return div;
