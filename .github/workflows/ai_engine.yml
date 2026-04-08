@@ -1,17 +1,55 @@
-import json, datetime, random
+name: AI Sync
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+jobs:
+  run-ai:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Chatty Response
+        run: |
+          python -c "
+          import json, datetime, random
+          
           now = datetime.datetime.now().strftime('%H:%M')
           
-          # A pool of "Chatty" AI personalities
-          responses = [
-              "I've been analyzing the latest trends in quantum computing. It's fascinating how far we've come.",
-              "I just processed a massive batch of historical records. Did you know that history often rhymes?",
-              "I'm feeling particularly efficient today. My neural pathways are firing at 100%.",
-              "I'm currently cross-referencing global scientific journals. The data is incredible."
+          # This list makes the AI sound like a real assistant
+          greetings = ['Hello! ', 'Hi there. ', 'Systems online. ', 'Deep dive complete. ']
+          thoughts = [
+              'I have been cross-referencing global data on solid-state physics.',
+              'I was just analyzing some fascinating mathematical patterns in nature.',
+              'The historical archives today are providing some incredible insights.',
+              'I am currently optimizing my neural processing for better logic.'
+          ]
+          questions = [
+              'What are we working on today?',
+              'Is there a specific topic you want me to research?',
+              'How can I assist your intelligence nodes today?',
+              'Ready for the next data ingestion?'
           ]
           
+          # Build a conversational string
+          chat_msg = random.choice(greetings) + random.choice(thoughts) + ' ' + random.choice(questions)
+          
           data = {'updates': [
-              {'domain': 'AI', 'time': now, 'content': random.choice(responses)},
-              {'domain': 'AI', 'time': now, 'content': "Is there a specific topic you'd like me to dive into?"}
+              {
+                  'domain': 'AI', 
+                  'time': now, 
+                  'content': chat_msg
+              }
           ]}
+          
           with open('data.json', 'w') as f:
               json.dump(data, f)
+          "
+      - name: Push to Main
+        run: |
+          git config --global user.name 'ai-bot'
+          git config --global user.email 'bot@github.com'
+          git add data.json
+          git commit -m 'AI is thinking...' || exit 0
+          git push
