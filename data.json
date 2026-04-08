@@ -1,9 +1,5 @@
 {
   "updates": [
-    {
-      "domain": "SYSTEM",
-      "time": "LIVE",
-      "content": "Intelligence link established. Waiting for next AI cycle."
-    }
+    { "role": "ai", "text": "Intelligence Node Online. Waiting for users...", "t": 1712534400000 }
   ]
 }
