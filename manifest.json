@@ -1,0 +1,17 @@
+{
+  "short_name": "TRO Network",
+  "name": "TRO Network Intelligence",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2103/2103633.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/ai/",
+  "background_color": "#0a0b10",
+  "display": "standalone",
+  "scope": "/ai/",
+  "theme_color": "#00d2ff"
+}
