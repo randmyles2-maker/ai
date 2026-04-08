@@ -7,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO NETWORK: Intelligence Uplink Active. Sourcing from verified global repositories.", "ai-msg");
+            this.addMessage("TRO INTELLIGENCE: Contextual Link Active. Optimized for efficiency.", "ai-msg");
         });
     }
 
@@ -24,36 +24,42 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        const responseBubble = this.addMessage("SEARCHING REPOSITORIES...", "ai-msg");
+        const responseBubble = this.addMessage("...", "ai-msg");
         
-        // Execute the "Smarter" Search
-        const result = await this.smartQuery(val);
+        // Smarter decision making based on word count
+        const wordCount = val.split(' ').length;
+        const result = await this.smartQuery(val, wordCount);
         
         responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async smartQuery(q) {
+    async smartQuery(q, length) {
         try {
-            // 1. Try Wikipedia for deep knowledge
             const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
             const wikiData = await wikiRes.json();
             
-            if (wikiData.extract && wikiData.type !== "disambiguation") {
-                return `<b>SOURCE: WIKIPEDIA</b><br>${wikiData.extract}`;
+            let source = "WIKIPEDIA";
+            let content = wikiData.extract;
+
+            if (!content || wikiData.type === "disambiguation") {
+                const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
+                const ddgData = await ddgRes.json();
+                content = ddgData.AbstractText;
+                source = "DUCKDUCKGO";
             }
 
-            // 2. Fallback to DuckDuckGo for live/general facts
-            const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
-            const ddgData = await ddgRes.json();
-            
-            if (ddgData.AbstractText) {
-                return `<b>SOURCE: DUCKDUCKGO</b><br>${ddgData.AbstractText}`;
+            if (!content) return "<b>NOTICE:</b> Data point not found in verified repositories.";
+
+            // SMARTS: If user typed 3 words or less, summarize the response to 1-2 sentences.
+            if (length <= 3) {
+                const sentences = content.split('. ');
+                content = sentences[0] + (sentences[1] ? '. ' + sentences[1] : '.');
             }
 
-            return "<b>NOTICE:</b> No verified source match found for this command.";
+            return `<b>SOURCE: ${source}</b><br>${content}`;
         } catch(e) {
-            return "<b>ERROR:</b> External uplink timed out.";
+            return "<b>ERROR:</b> Intelligence uplink interrupted.";
         }
     }
 
