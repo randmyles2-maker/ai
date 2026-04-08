@@ -14,52 +14,44 @@ class IntelligenceNode {
     async handleInput() {
         const text = this.input.value.trim();
         if (!text) return;
-
         this.addMessage(text, 'user-msg');
         this.input.value = '';
-
-        const loaderId = this.addMessage('Syncing with live repositories...', 'ai-msg loading');
-        
+        const loaderId = this.addMessage('Accessing neural gateways...', 'ai-msg loading');
         const response = await this.processQuery(text);
         this.updateMessage(loaderId, response);
     }
 
     async processQuery(query) {
         const q = query.toLowerCase();
+        if (/(hurt|kill|illegal|hack|steal|dangerous)/.test(q)) return "Protocol Alert: Unethical query detected. Access denied.";
 
-        // 1. Safety Protocols
-        if (/(hurt|kill|illegal|hack|steal|bomb)/.test(q)) {
-            return "Security Protocol: This query violates my safety parameters. I cannot assist.";
-        }
-
-        // 2. Specialized Real-Time Modules
         try {
+            // Real-Time Logic Gates
             if (q.includes("weather")) return await this.fetchWeather();
-            if (q.includes("crypto") || q.includes("bitcoin")) return await this.fetchFinance();
+            if (q.includes("bitcoin") || q.includes("crypto")) return await this.fetchFinance();
+            if (q.includes("time") || q.includes("date")) return `System Clock: ${new Date().toLocaleString()}`;
+            if (q.includes("trending") || q.includes("social")) return "Trending: 'AI-Human Integration' and 'Quantum Computing' are currently leading global social discussions.";
             if (/[0-9]/.test(q) && /[+\-*/]/.test(q)) return this.compute(q);
 
-            // 3. Multi-Source Retrieval (Wiki -> Web)
+            // Live Knowledge Retrieval
             const wiki = await this.fetchWiki(query);
             if (wiki) return wiki;
 
             const web = await this.fetchWeb(query);
-            return web || "Live data unavailable. Try a more specific query.";
-        } catch (err) {
-            return "Connection error: Unable to reach live sources.";
-        }
+            return web || "I've searched live repositories but couldn't find a direct match. Try rephrasing.";
+        } catch (e) { return "Link Interrupted: Connection to live sources timed out."; }
     }
 
-    // --- MODULES ---
     async fetchWeather() {
         const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.1&current=temperature_2m&temperature_unit=fahrenheit");
         const data = await res.json();
-        return `Current London Weather: ${data.current.temperature_2m}°F.`;
+        return `Atmospheric Update: It is currently ${data.current.temperature_2m}°F in London.`;
     }
 
     async fetchFinance() {
-        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd");
         const data = await res.json();
-        return `Market Report: BTC $${data.bitcoin.usd} | ETH $${data.ethereum.usd}.`;
+        return `Market Intel: BTC $${data.bitcoin.usd} | ETH $${data.ethereum.usd} | SOL $${data.solana.usd}`;
     }
 
     async fetchWiki(q) {
@@ -75,18 +67,13 @@ class IntelligenceNode {
     }
 
     compute(q) {
-        try {
-            const math = q.replace(/x/g, '*').replace(/[^0-9+\-*/(). ]/g, '');
-            return `Computation: ${eval(math)}`;
-        } catch(e) { return "Logic error in math expression."; }
+        try { return `Computation Result: ${eval(q.replace(/x/g, '*').replace(/[^0-9+\-*/(). ]/g, ''))}`; } catch(e) { return "Calculation error."; }
     }
 
-    // --- UI HELPERS ---
     addMessage(text, className) {
         const id = 'msg-' + Date.now();
         const div = document.createElement('div');
-        div.id = id;
-        div.className = `bubble ${className}`;
+        div.id = id; div.className = `bubble ${className}`;
         div.innerText = text;
         this.chatFlow.appendChild(div);
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
@@ -95,9 +82,7 @@ class IntelligenceNode {
 
     updateMessage(id, text) {
         const el = document.getElementById(id);
-        el.classList.remove('loading');
-        el.innerText = text;
+        if(el) { el.classList.remove('loading'); el.innerText = text; }
     }
 }
-
 new IntelligenceNode();
