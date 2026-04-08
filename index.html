@@ -5,54 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Node</title>
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: #fff; }
-        .msg { max-width: 80%; padding: 12px; border-radius: 18px; font-size: 15px; align-self: flex-start; background: #e9e9eb; }
+        body { font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f0f0f2; }
+        .header { padding: 15px; background: #fff; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 12px; border-radius: 18px; font-size: 15px; background: #e9e9eb; align-self: flex-start; }
         .user { align-self: flex-end; background: #007aff; color: white; }
-        .input-area { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
-        input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
-        button { background: #007aff; color: white; border: none; padding: 0 15px; border-radius: 20px; }
+        .input-area { padding: 15px; background: #fff; border-top: 1px solid #ddd; display: flex; gap: 10px; padding-bottom: 30px; }
+        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
+        button { background: #007aff; color: white; border: none; padding: 0 20px; border-radius: 25px; cursor: pointer; }
     </style>
 </head>
 <body>
+    <div class="header">Intelligence Node</div>
     <div id="chat-flow"></div>
     <div class="input-area">
-        <input type="text" id="user-input" placeholder="Type to AI...">
+        <input type="text" id="user-input" placeholder="Chat with AI...">
         <button onclick="sendMessage()">Send</button>
     </div>
 
     <script>
-        let localMessages = [];
+        // Load messages from memory so they never delete
+        let chatHistory = JSON.parse(localStorage.getItem('my_chat') || '[]');
 
         async function sync() {
             try {
                 const res = await fetch('data.json?t=' + Date.now());
-                const data = await res.json();
-                const flow = document.getElementById('chat-flow');
-                
-                // Merge server messages with your local unsaved messages
-                const allMessages = [...data.updates, ...localMessages];
-                
-                flow.innerHTML = allMessages.map(m => `
-                    <div class="msg ${m.domain === 'USER' ? 'user' : ''}">${m.content}</div>
-                `).join('');
-            } catch (e) {}
+                const serverData = await res.json();
+                render(serverData.updates);
+            } catch (e) { render([]); }
+        }
+
+        function render(serverMsgs) {
+            const flow = document.getElementById('chat-flow');
+            // Combine your typed messages with the AI messages
+            const combined = [...serverMsgs, ...chatHistory].sort((a,b) => a.time - b.time);
+            
+            flow.innerHTML = combined.map(m => `
+                <div class="msg ${m.domain === 'USER' ? 'user' : ''}">${m.content}</div>
+            `).join('');
+            flow.scrollTop = flow.scrollHeight;
         }
 
         function sendMessage() {
             const input = document.getElementById('user-input');
             if (!input.value) return;
 
-            // Add to local list so it doesn't disappear on refresh
-            localMessages.push({ domain: 'USER', content: input.value });
+            const newMsg = { domain: 'USER', content: input.value, time: Date.now() };
+            chatHistory.push(newMsg);
+            localStorage.setItem('my_chat', JSON.stringify(chatHistory));
+            
             input.value = '';
             sync();
-
-            // Direct Feedback
-            console.log("GitHub Action will read this in the next cycle.");
         }
 
-        setInterval(sync, 5000);
+        setInterval(sync, 10000);
         sync();
     </script>
 </body>
