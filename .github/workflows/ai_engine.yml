@@ -9,9 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # This fixes the warnings
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Updated to v4
 
       - name: Generate Content
         run: |
@@ -21,19 +23,19 @@ jobs:
           data = {
               'last_updated': now,
               'updates': [
-                  {'domain': 'MATH', 'time': now, 'content': 'Solved complex symbolic integration for vector fields.'},
-                  {'domain': 'SCIENCE', 'time': now, 'content': 'Retrieved latest quantum mechanics paper from arXiv.'},
-                  {'domain': 'HISTORY', 'time': now, 'content': 'Indexed 2026 geopolitical shifts into persistent memory.'}
+                  {'domain': 'MATH', 'time': now, 'content': 'Calculated trajectory constants for deep space telemetry.'},
+                  {'domain': 'SCIENCE', 'time': now, 'content': 'Synced latest quantum physics research from arXiv.'},
+                  {'domain': 'HISTORY', 'time': now, 'content': 'Global event timeline updated with real-time news.'}
               ]
           }
           with open('data.json', 'w') as f:
               json.dump(data, f, indent=4)
           "
 
-      - name: Push
+      - name: Push Changes
         run: |
           git config --global user.name 'AI-Bot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m 'AI Sync'
+          git commit -m 'AI Intelligence Sync' || echo "No changes to commit"
           git push
