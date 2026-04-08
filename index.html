@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time AI Node</title>
+    <title>AI Autonomous Node</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div id="app-container">
+    <div id="app">
+        <header>
+            <div class="status-dot"></div>
+            <h1>AI NODE: ACTIVE</h1>
+            <p>Real-Time Neural Link Online</p>
+        </header>
+
         <div id="chat-window">
-            <div class="msg ai">System Online. Real-time data modules active. How can I help?</div>
+            <div class="msg ai">System Online. All live data modules (Google, Wiki, Weather, Crypto) are synchronized. How can I assist?</div>
         </div>
-        <div class="input-bar">
-            <input type="text" id="user-input" placeholder="Ask about the weather or a fact..." onkeypress="if(event.key === 'Enter') sendMsg()">
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Query the live web or local logic..." onkeypress="if(event.key === 'Enter') sendMsg()">
             <button onclick="sendMsg()">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
-             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-         </svg> </button>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            </button>
         </div>
     </div>
     <script src="index.js"></script>
