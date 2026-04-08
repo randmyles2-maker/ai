@@ -9,6 +9,11 @@
             "role": "ai",
             "text": "Data ingestion complete. My core logic is now more refined.",
             "t": 1775616602840
+        },
+        {
+            "role": "ai",
+            "text": "I have ingested your data and added it to my knowledge base. Ask me a math problem!",
+            "t": 1775616957689
         }
     ]
 }
