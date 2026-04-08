@@ -7,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO CORE: Global Knowledge Base Linked. Ready for complex analysis.", "ai-msg");
+            this.addMessage("TRO UNIVERSAL: Math, Science, and Global Knowledge modules active.", "ai-msg");
         });
     }
 
@@ -24,54 +24,57 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        const responseBubble = this.addMessage("ACCESSING REPOSITORIES...", "ai-msg");
+        const responseBubble = this.addMessage("...", "ai-msg");
         
-        // Clean the query for better API matching
+        // Logic 1: Math Check
+        if (/[0-9]/.test(val) && /[+\-*/^()]/.test(val)) {
+            try {
+                const calculation = val.replace(/[^-()\d/*+.]/g, '');
+                const result = Function('"use strict";return (' + calculation + ')')();
+                responseBubble.innerHTML = `<b>MODULE: MATHEMATICS</b><br>Result: ${result}`;
+                return;
+            } catch(e) {}
+        }
+
+        // Logic 2: Knowledge Retrieval
         const cleanQuery = val.toLowerCase()
             .replace(/whats|what is|who is|define|how does|explain|tell me about/g, "")
             .trim();
 
-        const result = await this.deepSearch(cleanQuery, val);
+        const result = await this.universalSearch(cleanQuery, val);
         responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async deepSearch(q, rawQuery) {
+    async universalSearch(q, raw) {
         try {
-            // Attempt 1: Scientific/Factual Deep Dive (Wikipedia)
             const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
             const wikiData = await wikiRes.json();
             
             if (wikiData.extract && wikiData.type !== "disambiguation") {
-                return this.smartFormat("KNOWLEDGE BASE", wikiData.extract, rawQuery);
+                return this.smartFormat("KNOWLEDGE BASE", wikiData.extract, raw);
             }
 
-            // Attempt 2: General/Complex Web Summary (DuckDuckGo)
             const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
             const ddgData = await ddgRes.json();
             
             if (ddgData.AbstractText) {
-                return this.smartFormat("GLOBAL SOURCE", ddgData.AbstractText, rawQuery);
+                return this.smartFormat("GLOBAL SOURCE", ddgData.AbstractText, raw);
             }
 
-            return "<b>SYSTEM NOTICE:</b> No verified data match found in the current uplink. Try rephrasing for deep analysis.";
+            return "<b>NOTICE:</b> Intelligence link could not find a verified source for this query.";
         } catch(e) {
-            return "<b>UPLINK ERROR:</b> Failed to reach external knowledge centers.";
+            return "<b>ERROR:</b> System Uplink Timeout.";
         }
     }
 
-    smartFormat(source, text, originalQuery) {
-        // COMPLEXITY LOGIC: 
-        // If the user's query contains "explain" or is longer than 5 words, give the full detail.
-        // Otherwise, provide a punchy, smarter summary.
-        const isComplexRequest = originalQuery.toLowerCase().includes('explain') || originalQuery.split(' ').length > 5;
-        
+    smartFormat(source, text, original) {
+        const isComplex = original.toLowerCase().includes('explain') || original.split(' ').length > 4;
         let content = text;
-        if (!isComplexRequest) {
+        if (!isComplex) {
             const sentences = text.split('. ');
             content = sentences[0] + (sentences[1] ? '. ' + sentences[1] : '.');
         }
-
         return `<b>SOURCE: ${source}</b><br>${content}`;
     }
 
