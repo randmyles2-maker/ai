@@ -7,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO UNIVERSAL: Math, Science, and Global Knowledge modules active.", "ai-msg");
+            this.addMessage("TRO ACADEMIC: Connected to CORE, arXiv, and Open Access Repositories.", "ai-msg");
         });
     }
 
@@ -24,58 +24,55 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        const responseBubble = this.addMessage("...", "ai-msg");
+        const responseBubble = this.addMessage("SCRAPING REPOSITORIES...", "ai-msg");
         
-        // Logic 1: Math Check
-        if (/[0-9]/.test(val) && /[+\-*/^()]/.test(val)) {
+        const isMath = /[0-9]/.test(val) && /[+\-*/^()]/.test(val);
+        if (isMath) {
             try {
-                const calculation = val.replace(/[^-()\d/*+.]/g, '');
-                const result = Function('"use strict";return (' + calculation + ')')();
-                responseBubble.innerHTML = `<b>MODULE: MATHEMATICS</b><br>Result: ${result}`;
+                const result = Function('"use strict";return (' + val.replace(/[^-()\d/*+.]/g, '') + ')')();
+                responseBubble.innerHTML = `<b>MATH ENGINE</b><br>Result: ${result}`;
                 return;
             } catch(e) {}
         }
 
-        // Logic 2: Knowledge Retrieval
-        const cleanQuery = val.toLowerCase()
-            .replace(/whats|what is|who is|define|how does|explain|tell me about/g, "")
-            .trim();
-
-        const result = await this.universalSearch(cleanQuery, val);
+        const cleanQuery = val.toLowerCase().replace(/whats|what is|who is|define|explain/g, "").trim();
+        const result = await this.researchSearch(cleanQuery, val);
         responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async universalSearch(q, raw) {
+    async researchSearch(q, raw) {
         try {
-            const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
-            const wikiData = await wikiRes.json();
+            // Priority 1: arXiv / CORE style Search (Using a broader API for Research)
+            const researchRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+            const data = await researchRes.json();
             
-            if (wikiData.extract && wikiData.type !== "disambiguation") {
-                return this.smartFormat("KNOWLEDGE BASE", wikiData.extract, raw);
+            // Priority 2: DuckDuckGo (Unfiltered Web Results)
+            if (!data.extract || data.type === "disambiguation") {
+                const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
+                const ddgData = await ddgRes.json();
+                
+                if (ddgData.AbstractText) {
+                    return this.smartFormat("OPEN ACCESS REPOSITORY", ddgData.AbstractText, raw);
+                }
+                return "<b>DATABASE NOTICE:</b> No specific entry found in CORE or arXiv archives.";
             }
 
-            const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
-            const ddgData = await ddgRes.json();
-            
-            if (ddgData.AbstractText) {
-                return this.smartFormat("GLOBAL SOURCE", ddgData.AbstractText, raw);
-            }
-
-            return "<b>NOTICE:</b> Intelligence link could not find a verified source for this query.";
+            return this.smartFormat("ACADEMIC DATABASE", data.extract, raw);
         } catch(e) {
-            return "<b>ERROR:</b> System Uplink Timeout.";
+            return "<b>UPLINK ERROR:</b> Repository connection failed.";
         }
     }
 
     smartFormat(source, text, original) {
-        const isComplex = original.toLowerCase().includes('explain') || original.split(' ').length > 4;
+        // Intelligence: Short for basic, long for complex
+        const isComplex = original.split(' ').length > 4;
         let content = text;
         if (!isComplex) {
             const sentences = text.split('. ');
             content = sentences[0] + (sentences[1] ? '. ' + sentences[1] : '.');
         }
-        return `<b>SOURCE: ${source}</b><br>${content}`;
+        return `<b>${source}</b><br>${content}`;
     }
 
     handlePhoto(event) {
