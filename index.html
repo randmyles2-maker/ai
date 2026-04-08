@@ -2,30 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AURA | Core Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRO Network | Core Intelligence</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div id="ai-shell">
-        <header>
-            <div class="brand">
-                <span class="pulse-icon"></span>
-                <h1>AURA <small>v3.0 Live</small></h1>
+    <div id="tro-container">
+        <aside id="sidebar">
+            <div class="logo">TRO <span>NETWORK</span></div>
+            <nav>
+                <div class="nav-item active">Main Terminal</div>
+                <div class="nav-item">Web Harvester</div>
+                <div class="nav-item">Social Hub</div>
+            </nav>
+            <div id="system-stats">
+                <p>CPU: 12%</p>
+                <p>RAM: 1.2GB</p>
+                <p>Status: Synchronized</p>
             </div>
-            <div id="system-status">Sourcing: Web, Wiki, Satellite, Social</div>
-        </header>
+        </aside>
 
-        <main id="chat-flow">
-            <div class="bubble ai-msg">Neural Link Established. System is operating at peak capacity. How can I assist you?</div>
+        <main id="main-terminal">
+            <header>
+                <div class="pulse"></div>
+                <h2>NEURAL LINK: ACTIVE</h2>
+            </header>
+            
+            <div id="chat-flow">
+                <div class="bubble ai-msg">TRO Network Online. Awaiting computational commands...</div>
+            </div>
+
+            <footer class="input-area">
+                <input type="text" id="user-query" placeholder="Execute command..." autocomplete="off">
+                <button id="send-btn">SEND</button>
+            </footer>
         </main>
-
-        <footer class="input-container">
-            <input type="text" id="user-query" placeholder="Type your command..." autocomplete="off">
-            <button id="send-btn">
-                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
-        </footer>
     </div>
     <script src="index.js"></script>
 </body>
