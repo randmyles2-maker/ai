@@ -5,13 +5,15 @@ class TRONetwork {
         this.btn = document.getElementById('send-btn');
         this.photoInput = document.getElementById('photo-input');
         this.init();
+        
+        window.addEventListener('load', () => {
+            this.addMessage("TRO UPLINK STABLE. READY FOR COMMAND.", "ai-msg");
+        });
     }
 
     init() {
         this.btn.onclick = () => this.handleInput();
         this.input.onkeydown = (e) => { if (e.key === 'Enter') this.handleInput(); };
-        
-        // Handle Photo Upload
         this.photoInput.onchange = (e) => this.handlePhoto(e);
     }
 
@@ -21,10 +23,9 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        // AI Response Logic
         setTimeout(() => {
-            this.addMessage("TRO System: Command received and logged.", "ai-msg");
-        }, 600);
+            this.addMessage("COMMAND PROCESSED.", "ai-msg");
+        }, 800);
     }
 
     handlePhoto(event) {
@@ -32,8 +33,7 @@ class TRONetwork {
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const imgTag = `<img src="${e.target.result}" class="chat-img">`;
-                this.addMessage(imgTag, 'user-msg', true);
+                this.addMessage(`<img src="${e.target.result}" class="chat-img">`, 'user-msg', true);
             };
             reader.readAsDataURL(file);
         }
@@ -42,25 +42,11 @@ class TRONetwork {
     addMessage(content, type, isHTML = false) {
         const div = document.createElement('div');
         div.className = `bubble ${type}`;
-        
-        if (isHTML) {
-            div.innerHTML = content;
-        } else {
-            div.innerText = content;
-        }
-
+        isHTML ? div.innerHTML = content : div.innerText = content;
         this.chatFlow.appendChild(div);
         
-        // Forced scroll to bottom
-        setTimeout(() => {
-            this.chatFlow.scrollTo({
-                top: this.chatFlow.scrollHeight,
-                behavior: 'smooth'
-            });
-        }, 50);
-        
-        return div;
+        // Ensure it scrolls to the newest message
+        this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 }
-
 new TRONetwork();
