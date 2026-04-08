@@ -7,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO UNIVERSAL INTELLIGENCE: Math, Science, and Fact-Check modules online.", "ai-msg");
+            this.addMessage("TRO CORE: Global Knowledge Base Linked. Ready for complex analysis.", "ai-msg");
         });
     }
 
@@ -24,60 +24,54 @@ class TRONetwork {
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        const responseBubble = this.addMessage("...", "ai-msg");
+        const responseBubble = this.addMessage("ACCESSING REPOSITORIES...", "ai-msg");
         
-        // 1. Check if it's a Math Question
-        if (/[0-9]/.test(val) && /[+\-*/^()]/.test(val)) {
-            try {
-                // Basic math solver logic
-                const calculation = val.replace(/[^-()\d/*+.]/g, '');
-                const result = Function('"use strict";return (' + calculation + ')')();
-                responseBubble.innerHTML = `<b>MODULE: MATHEMATICS</b><br>Result: ${result}`;
-                return;
-            } catch(e) { /* Fallthrough to search if math fails */ }
-        }
-
-        // 2. Clean query for Science/Facts
+        // Clean the query for better API matching
         const cleanQuery = val.toLowerCase()
-            .replace(/whats|what is|who is|define|how does|tell me about/g, "")
+            .replace(/whats|what is|who is|define|how does|explain|tell me about/g, "")
             .trim();
 
-        const result = await this.universalSearch(cleanQuery, val.split(' ').length);
+        const result = await this.deepSearch(cleanQuery, val);
         responseBubble.innerHTML = result;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 
-    async universalSearch(q, length) {
+    async deepSearch(q, rawQuery) {
         try {
-            // Priority 1: Wikipedia (Best for Science/History)
+            // Attempt 1: Scientific/Factual Deep Dive (Wikipedia)
             const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
             const wikiData = await wikiRes.json();
             
             if (wikiData.extract && wikiData.type !== "disambiguation") {
-                return this.formatResponse("KNOWLEDGE BASE", wikiData.extract, length);
+                return this.smartFormat("KNOWLEDGE BASE", wikiData.extract, rawQuery);
             }
 
-            // Priority 2: DuckDuckGo (Best for general/quick questions)
+            // Attempt 2: General/Complex Web Summary (DuckDuckGo)
             const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
             const ddgData = await ddgRes.json();
             
             if (ddgData.AbstractText) {
-                return this.formatResponse("WEB SOURCE", ddgData.AbstractText, length);
+                return this.smartFormat("GLOBAL SOURCE", ddgData.AbstractText, rawQuery);
             }
 
-            return "<b>NOTICE:</b> Query remains outside known repositories. Rephrase for uplink.";
+            return "<b>SYSTEM NOTICE:</b> No verified data match found in the current uplink. Try rephrasing for deep analysis.";
         } catch(e) {
-            return "<b>ERROR:</b> System Uplink Timeout.";
+            return "<b>UPLINK ERROR:</b> Failed to reach external knowledge centers.";
         }
     }
 
-    formatResponse(source, text, length) {
+    smartFormat(source, text, originalQuery) {
+        // COMPLEXITY LOGIC: 
+        // If the user's query contains "explain" or is longer than 5 words, give the full detail.
+        // Otherwise, provide a punchy, smarter summary.
+        const isComplexRequest = originalQuery.toLowerCase().includes('explain') || originalQuery.split(' ').length > 5;
+        
         let content = text;
-        // If query is 3 words or less, give a shorter, "smarter" answer
-        if (length <= 3) {
+        if (!isComplexRequest) {
             const sentences = text.split('. ');
             content = sentences[0] + (sentences[1] ? '. ' + sentences[1] : '.');
         }
+
         return `<b>SOURCE: ${source}</b><br>${content}`;
     }
 
