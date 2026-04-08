@@ -2,65 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Intelligence Stream</title>
     <style>
-        :root {
-            --ios-blue: #007aff; --ios-grey: #e9e9eb;
-            --ios-text-dark: #000000; --ios-text-grey: #8e8e93;
-            --bg-color: #ffffff;
-        }
-        * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; 
-            background-color: var(--bg-color); margin: 0; display: flex; 
-            flex-direction: column; height: 100vh; overflow: hidden;
-        }
-        .header { 
-            padding: 15px; border-bottom: 1px solid #d1d1d6; text-align: center; 
-            background: rgba(247, 247, 247, 0.8); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 100;
-        }
-        .header h1 { margin: 0; font-size: 17px; font-weight: 600; }
-        .status-indicator { font-size: 10px; color: #34c759; text-transform: uppercase; margin-top: 2px; font-weight: 700; }
-        #chat-flow { flex: 1; overflow-y: scroll; padding: 20px 15px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { 
-            max-width: 75%; padding: 10px 16px; border-radius: 20px; font-size: 15px; 
-            line-height: 1.4; align-self: flex-start; background-color: var(--ios-grey); 
-            color: var(--ios-text-dark); border-bottom-left-radius: 4px;
-        }
-        .label { font-size: 10px; font-weight: 700; color: var(--ios-text-grey); margin-bottom: 2px; text-transform: uppercase; }
-        .timestamp { font-size: 11px; color: var(--ios-text-grey); text-align: center; margin: 15px 0 5px 0; width: 100%; }
+        body { font-family: -apple-system, sans-serif; background: #ffffff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .header { padding: 15px; border-bottom: 1px solid #d1d1d6; text-align: center; background: #f7f7f7; font-weight: 600; }
+        #chat-flow { flex: 1; overflow-y: scroll; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 75%; padding: 12px; border-radius: 18px; font-size: 15px; background: #e9e9eb; color: #000; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .label { font-size: 10px; font-weight: bold; color: #8e8e93; text-transform: uppercase; margin-bottom: 2px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Intelligence Node</h1>
-        <div class="status-indicator">● Active</div>
-    </div>
-    <div id="chat-flow">
-        <div class="timestamp">Today</div>
-        <div id="messages">
-             <div class="msg">Initializing encrypted link... checking for sync.</div>
-        </div>
-    </div>
+    <div class="header">Intelligence Node</div>
+    <div id="chat-flow"><div class="msg">Establishing Link...</div></div>
     <script>
-        async function updateStream() {
+        async function update() {
             try {
-                const res = await fetch('data.json?t=' + Date.now());
-                const data = await res.json();
-                const container = document.getElementById('messages');
-                if (data.updates && data.updates.length > 0) {
-                    container.innerHTML = data.updates.map(item => `
-                        <div class="msg" style="margin-bottom:10px;">
-                            <div class="label">${item.domain} • ${item.time}</div>
-                            ${item.content}
-                        </div>`).join('');
+                const r = await fetch('data.json?nocache=' + Date.now());
+                const d = await r.json();
+                if (d.updates && d.updates.length > 0) {
+                    document.getElementById('chat-flow').innerHTML = d.updates.map(i => `
+                        <div class="msg"><div class="label">${i.domain} • ${i.time}</div>${i.content}</div>
+                    `).join('');
                 }
-            } catch (e) { console.log("Syncing..."); }
+            } catch (e) { console.log("Waiting for data..."); }
         }
-        setInterval(updateStream, 10000);
-        updateStream();
+        setInterval(update, 10000);
+        update();
     </script>
 </body>
 </html>
