@@ -2,8 +2,9 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Node</title>
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #fff; }
+        body { font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         .bubble { max-width: 75%; padding: 10px 15px; border-radius: 20px; font-size: 16px; line-height: 1.4; }
         .ai { background: #e9e9eb; color: #000; align-self: flex-start; border-bottom-left-radius: 4px; }
@@ -16,11 +17,10 @@
 <body>
     <div id="chat"></div>
     <div class="bar">
-        <input type="text" id="in" placeholder="iMessage">
+        <input type="text" id="in" placeholder="Ask math, science, or history...">
         <button onclick="send()">Send</button>
     </div>
     <script>
-        // Load messages from memory so they stay on screen
         let history = JSON.parse(localStorage.getItem('ai_chat') || '[]');
         
         async function load() {
@@ -28,8 +28,6 @@
                 const r = await fetch('data.json?v=' + Date.now());
                 const d = await r.json();
                 const chat = document.getElementById('chat');
-                
-                // Show both server responses and your local history
                 const all = [...d.updates, ...history].sort((a, b) => a.t - b.t);
                 chat.innerHTML = all.map(m => `<div class="bubble ${m.role}">${m.text}</div>`).join('');
                 chat.scrollTop = chat.scrollHeight;
@@ -39,17 +37,15 @@
         function send() {
             const i = document.getElementById('in');
             if(!i.value) return;
-            
-            // Add your message locally
-            const userMsg = { role: 'user', text: i.value, t: Date.now() };
-            history.push(userMsg);
+            const val = i.value;
+            history.push({ role: 'user', text: val, t: Date.now() });
             localStorage.setItem('ai_chat', JSON.stringify(history));
             
+            // This is the 'Secret Coordination'
+            // We tell the user how to trigger the response
+            console.log("To process: " + val);
             i.value = '';
             load();
-            
-            // Helpful hint for the user
-            console.log("To get a reply, click 'Run Workflow' in GitHub Actions!");
         }
         setInterval(load, 5000);
         load();
