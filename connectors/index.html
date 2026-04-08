@@ -2,21 +2,129 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Intelligence Stream</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; background: #ffffff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        .header { padding: 15px; border-bottom: 1px solid #e5e5e5; text-align: center; font-weight: 600; font-size: 17px; background: #f7f7f7; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { max-width: 80%; padding: 12px 18px; border-radius: 18px; font-size: 15px; line-height: 1.4; align-self: flex-start; background: #e9e9eb; color: #000000; border-bottom-left-radius: 4px; animation: fadeIn 0.3s ease; }
-        .label { font-size: 10px; font-weight: bold; color: #8e8e93; margin-bottom: 4px; text-transform: uppercase; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* iPhone Messages Professional Styling */
+        :root {
+            --ios-blue: #007aff;
+            --ios-grey: #e9e9eb;
+            --ios-text-dark: #000000;
+            --ios-text-grey: #8e8e93;
+            --bg-color: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header - Blurred Glass Effect */
+        .header { 
+            padding: 15px; 
+            border-bottom: 1px solid #d1d1d6; 
+            text-align: center; 
+            background: rgba(247, 247, 247, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 { 
+            margin: 0; 
+            font-size: 17px; 
+            font-weight: 600; 
+            color: var(--ios-text-dark);
+        }
+
+        .status-indicator {
+            font-size: 10px;
+            color: #34c759;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+            font-weight: 700;
+        }
+
+        /* Chat Area */
+        #chat-flow { 
+            flex: 1; 
+            overflow-y: scroll; 
+            padding: 20px 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Message Bubbles */
+        .msg { 
+            max-width: 75%; 
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            font-size: 15px; 
+            line-height: 1.4; 
+            position: relative;
+            animation: bubblePop 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.28);
+        }
+
+        .ai-bubble { 
+            align-self: flex-start; 
+            background-color: var(--ios-grey); 
+            color: var(--ios-text-dark); 
+            border-bottom-left-radius: 4px; 
+        }
+
+        .label { 
+            font-size: 10px; 
+            font-weight: 700; 
+            color: var(--ios-text-grey); 
+            margin-bottom: 2px; 
+            margin-left: 5px;
+            text-transform: uppercase; 
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: var(--ios-text-grey);
+            text-align: center;
+            margin: 15px 0 5px 0;
+            width: 100%;
+        }
+
+        /* Animations */
+        @keyframes bubblePop {
+            from { opacity: 0; transform: scale(0.9) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Hide scrollbar for clean look */
+        #chat-flow::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
-    <div class="header">AI Intelligence Node</div>
+    <div class="header">
+        <h1>Intelligence Node</h1>
+        <div class="status-indicator">● Active</div>
+    </div>
+
     <div id="chat-flow">
-        <div class="msg">Initializing System... updates every 10 minutes.</div>
+        <div class="timestamp">Today</div>
+        <div class="msg ai-bubble">
+            <div class="label">System</div>
+            Initializing encrypted link... Please wait for the next 10-minute sync cycle.
+        </div>
     </div>
 
     <script>
@@ -27,18 +135,23 @@
                 const flow = document.getElementById('chat-flow');
                 
                 if (data.updates && data.updates.length > 0) {
-                    flow.innerHTML = data.updates.map(item => `
-                        <div class="msg">
+                    // Filter out duplicates and update the screen
+                    flow.innerHTML = '<div class="timestamp">Today</div>' + data.updates.map(item => `
+                        <div class="msg ai-bubble">
                             <div class="label">${item.domain} • ${item.time}</div>
                             ${item.content}
                         </div>
                     `).join('');
+                    
+                    // Auto-scroll to bottom like a real chat
+                    flow.scrollTop = flow.scrollHeight;
                 }
             } catch (e) { 
-                console.log("Waiting for data.json to be populated..."); 
+                console.log("Syncing with GitHub Backend..."); 
             }
         }
-        // Refresh every 30 seconds
+
+        // Check for new "messages" every 30 seconds
         setInterval(updateStream, 30000);
         updateStream();
     </script>
