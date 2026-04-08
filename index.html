@@ -3,63 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Node</title>
+    <title>iMessage AI</title>
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f0f0f2; }
-        .header { padding: 15px; background: #fff; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 80%; padding: 12px; border-radius: 18px; font-size: 15px; background: #e9e9eb; align-self: flex-start; }
-        .user { align-self: flex-end; background: #007aff; color: white; }
-        .input-area { padding: 15px; background: #fff; border-top: 1px solid #ddd; display: flex; gap: 10px; padding-bottom: 30px; }
-        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
-        button { background: #007aff; color: white; border: none; padding: 0 20px; border-radius: 25px; cursor: pointer; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; margin: 0; background: #fff; display: flex; flex-direction: column; height: 100vh; }
+        .header { padding: 40px 20px 10px; text-align: center; border-bottom: 0.5px solid #d1d1d6; background: rgba(255,255,255,0.9); position: sticky; top: 0; }
+        .header h1 { margin: 0; font-size: 17px; font-weight: 600; }
+        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .bubble { max-width: 70%; padding: 8px 15px; border-radius: 20px; font-size: 15px; line-height: 1.4; position: relative; }
+        .ai { background: #e9e9eb; color: black; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .user { background: #007aff; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .input-bar { padding: 10px 15px 30px; border-top: 0.5px solid #d1d1d6; display: flex; gap: 10px; background: #fff; }
+        input { flex: 1; border: 1px solid #d1d1d6; padding: 8px 15px; border-radius: 20px; outline: none; font-size: 16px; }
+        button { background: #007aff; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="header">Intelligence Node</div>
-    <div id="chat-flow"></div>
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="Chat with AI...">
-        <button onclick="sendMessage()">Send</button>
+    <div class="header"><h1>AI Intelligence</h1></div>
+    <div id="chat"></div>
+    <div class="input-bar">
+        <input type="text" id="msg-input" placeholder="iMessage">
+        <button onclick="send()">↑</button>
     </div>
 
     <script>
-        // Load messages from memory so they never delete
-        let chatHistory = JSON.parse(localStorage.getItem('my_chat') || '[]');
+        let myHistory = JSON.parse(localStorage.getItem('chat_memory') || '[]');
 
-        async function sync() {
+        async function loadMessages() {
             try {
-                const res = await fetch('data.json?t=' + Date.now());
-                const serverData = await res.json();
-                render(serverData.updates);
-            } catch (e) { render([]); }
+                const res = await fetch('data.json?cache=' + Date.now());
+                const data = await res.json();
+                const chat = document.getElementById('chat');
+                
+                // Combine AI messages from server and your local messages
+                const combined = [...data.updates, ...myHistory].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                
+                chat.innerHTML = combined.map(m => `
+                    <div class="bubble ${m.domain === 'USER' ? 'user' : 'ai'}">${m.content}</div>
+                `).join('');
+                chat.scrollTop = chat.scrollHeight;
+            } catch (e) { console.log("Waiting for AI sync..."); }
         }
 
-        function render(serverMsgs) {
-            const flow = document.getElementById('chat-flow');
-            // Combine your typed messages with the AI messages
-            const combined = [...serverMsgs, ...chatHistory].sort((a,b) => a.time - b.time);
+        function send() {
+            const el = document.getElementById('msg-input');
+            if (!el.value) return;
+
+            const newMsg = { domain: 'USER', content: el.value, timestamp: Date.now() };
+            myHistory.push(newMsg);
+            localStorage.setItem('chat_memory', JSON.stringify(myHistory));
             
-            flow.innerHTML = combined.map(m => `
-                <div class="msg ${m.domain === 'USER' ? 'user' : ''}">${m.content}</div>
-            `).join('');
-            flow.scrollTop = flow.scrollHeight;
+            el.value = '';
+            loadMessages();
+            alert("Sent to AI! It will respond in the next 10-minute cycle.");
         }
 
-        function sendMessage() {
-            const input = document.getElementById('user-input');
-            if (!input.value) return;
-
-            const newMsg = { domain: 'USER', content: input.value, time: Date.now() };
-            chatHistory.push(newMsg);
-            localStorage.setItem('my_chat', JSON.stringify(chatHistory));
-            
-            input.value = '';
-            sync();
-        }
-
-        setInterval(sync, 10000);
-        sync();
+        setInterval(loadMessages, 5000);
+        loadMessages();
     </script>
 </body>
 </html>
