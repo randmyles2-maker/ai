@@ -1,26 +1,27 @@
 /**
- * AURA v3.0 - Autonomous Intelligence Node
- * Real-time Math, Literature, and Global Search
+ * TRO NETWORK - Global Intelligence Node
+ * Dashboard-style Terminal with Message Persistence
  */
 
-class IntelligenceNode {
+class TRONetwork {
     constructor() {
         this.chatFlow = document.getElementById('chat-flow');
         this.input = document.getElementById('user-query');
         this.btn = document.getElementById('send-btn');
+        this.savedList = document.getElementById('saved-list'); // For the sidebar storage
         this.init();
     }
 
     init() {
-        // Fix: Explicitly listen for the Enter key on the input field
+        // Handle ENTER Key Press
         this.input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                e.preventDefault(); // Stop page from refreshing
+                e.preventDefault(); 
                 this.handleInput();
             }
         });
 
-        // Handle the button click
+        // Handle Mouse Click
         this.btn.addEventListener('click', () => this.handleInput());
     }
 
@@ -33,7 +34,7 @@ class IntelligenceNode {
         this.input.value = '';
 
         // Add a temporary "Thinking" bubble
-        const loaderId = this.addMessage('Syncing with Global Neural Repositories...', 'ai-msg loading');
+        const loaderId = this.addMessage('TRO Network: Syncing with Neural Repositories...', 'ai-msg loading');
         
         // Process the actual intelligence
         const response = await this.processQuery(text);
@@ -50,8 +51,7 @@ class IntelligenceNode {
             return "Protocol Error: Access denied for unethical or dangerous parameters.";
         }
 
-        // 2. MATH ENGINE (Common sense logic for numbers)
-        // Checks if query has numbers and math operators
+        // 2. MATH ENGINE
         if (/[0-9]/.test(q) && /[+\-*/^()]/.test(q)) {
             return this.solveMath(q);
         }
@@ -60,38 +60,34 @@ class IntelligenceNode {
         if (q.includes("weather")) return await this.fetchWeather();
         if (q.includes("bitcoin") || q.includes("crypto")) return await this.fetchFinance();
 
-        // 4. LITERATURE & KNOWLEDGE (Deep Wikipedia Search)
-        // This handles "What began WW2", "Themes of Hamlet", etc.
+        // 4. KNOWLEDGE & LITERATURE (Deep Wikipedia Search)
         const wiki = await this.fetchWiki(query);
         if (wiki) return wiki;
 
-        // 5. WEB SEARCH FALLBACK (DuckDuckGo Live)
+        // 5. WEB SEARCH FALLBACK
         const web = await this.fetchWeb(query);
-        return web || "Search depth exceeded. No definitive match found in live repositories.";
+        return web || "TRO Network: No definitive match found in live repositories.";
     }
 
     // --- COMPUTATIONAL MODULE ---
     solveMath(q) {
         try {
-            // Converts 'x' to '*' and removes illegal characters for safety
             const expression = q.replace(/x/g, '*').replace(/[^-()\d/*+.]/g, '');
             const result = eval(expression);
-            return `Computation Complete: The result is ${result}`;
+            return `Computation Complete: Result = ${result}`;
         } catch (e) {
-            return "Mathematical Error: Expression is too complex or malformed.";
+            return "Mathematical Error: Expression malformed.";
         }
     }
 
     // --- KNOWLEDGE MODULES ---
     async fetchWiki(q) {
         try {
-            // Search Wikipedia to find the most accurate page title
             const searchRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
             const searchData = await searchRes.json();
             
             if (searchData.query.search.length > 0) {
                 const bestTitle = searchData.query.search[0].title;
-                // Fetch the summary for the best title found
                 const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`);
                 const data = await summaryRes.json();
                 return data.extract;
@@ -112,13 +108,30 @@ class IntelligenceNode {
     async fetchWeather() {
         const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.1&current=temperature_2m&temperature_unit=fahrenheit");
         const data = await res.json();
-        return `Atmospheric Update: It is currently ${data.current.temperature_2m}°F in London.`;
+        return `Atmospheric Update: Current Temperature is ${data.current.temperature_2m}°F in London.`;
     }
 
     async fetchFinance() {
         const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
         const data = await res.json();
         return `Market Intel: BTC $${data.bitcoin.usd} | ETH $${data.ethereum.usd}.`;
+    }
+
+    // --- MESSAGE SAVING MODULE ---
+    saveData(text) {
+        const item = document.createElement('div');
+        item.className = 'saved-item';
+        
+        const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        // Preview text
+        item.innerText = `[${timestamp}] ${text.substring(0, 20)}...`;
+        
+        // When you click the sidebar item, it alerts the full message
+        item.onclick = () => {
+            alert("TRO DATA RECALL:\n\n" + text);
+        };
+
+        this.savedList.prepend(item); // Add new saves to the top
     }
 
     // --- UI HELPERS ---
@@ -128,6 +141,13 @@ class IntelligenceNode {
         div.id = id;
         div.className = `bubble ${className}`;
         div.innerText = text;
+
+        // If it's an AI message, add a click listener to save it
+        if (className.includes('ai-msg')) {
+            div.style.cursor = "pointer";
+            div.addEventListener('click', () => this.saveData(text));
+        }
+
         this.chatFlow.appendChild(div);
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
         return id;
@@ -142,5 +162,5 @@ class IntelligenceNode {
     }
 }
 
-// Start Engine
-new IntelligenceNode();
+// Initialize the TRO Network
+new TRONetwork();
