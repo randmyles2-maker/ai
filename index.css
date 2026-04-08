@@ -6,26 +6,23 @@
     --text: #e0e0e0;
 }
 
-* { box-sizing: border-box; }
-
-body, html { 
-    margin: 0; padding: 0; 
-    /* This handles the iPhone 12 notch and home bar */
-    height: 100dvh; 
-    width: 100vw; 
-    background: var(--bg); 
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+/* 1. RESET: Lock everything to the visible screen */
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
     overflow: hidden; 
+    background: var(--bg);
+    position: fixed; /* Prevents "ghost" scrolling on iOS */
 }
 
-#app-wrapper { 
-    display: flex; 
-    height: 100%; 
-    width: 100vw; 
+/* 2. WRAPPER: Responsive Flexbox */
+#app-wrapper {
+    display: flex;
+    width: 100vw;
+    height: 100dvh; /* Dynamic height for iPhone bars */
 }
 
-/* SIDEBAR - Hidden on small screens for better "App" feel, or kept as a drawer */
+/* 3. SIDEBAR: Only visible on Desktop/Laptops */
 #sidebar {
     width: 260px;
     background: var(--side);
@@ -33,92 +30,74 @@ body, html {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    /* Adjust for iPhone top notch */
     padding-top: env(safe-area-inset-top);
 }
 
+/* MOBILE FIX: On screens smaller than 768px (like iPhone 12) */
 @media (max-width: 768px) {
-    #sidebar { display: none; } /* Hide sidebar on iPhone to focus on chat */
+    #sidebar {
+        display: none; /* Hide sidebar to stop it from pushing chat off-screen */
+    }
 }
 
-/* MAIN STAGE */
-#stage { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100%; 
-    position: relative; 
+/* 4. MAIN STAGE: The actual Chat Area */
+#stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     background: #080808;
+    position: relative;
+    width: 100%; /* Force it to take up all remaining space */
 }
 
 #chat-flow {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 15px;
+    padding-bottom: 120px; /* Space for input */
+    padding-top: env(safe-area-inset-top);
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    /* CRITICAL: Leaves space for the input box and iPhone home bar */
-    padding-bottom: 120px; 
-    padding-top: env(safe-area-inset-top);
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* MESSAGE BUBBLES */
-.bubble { 
-    max-width: 85%; 
-    padding: 12px 16px; 
-    border-radius: 18px; 
-    line-height: 1.4; 
-    font-size: 1rem; 
-    word-wrap: break-word;
-}
-.ai-msg { 
-    background: var(--card); 
-    align-self: flex-start; 
-    border-bottom-left-radius: 4px; 
-}
-.user-msg { 
-    background: var(--accent); 
-    color: #000; 
-    align-self: flex-end; 
-    border-bottom-right-radius: 4px; 
-}
-
-/* FLOATING INPUT BAR */
+/* 5. INPUT BOX: Styled for iPhone usage */
 .input-container {
-    position: absolute; 
-    bottom: 0; 
-    left: 0;
-    width: 100%;
-    /* Adds extra space for the iPhone 12 swipe bar at the bottom */
-    padding: 15px 15px calc(15px + env(safe-area-inset-bottom)) 15px;
-    background: linear-gradient(transparent, var(--bg) 20%);
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 50%);
 }
 
 .input-box {
-    background: #1c1f26;
-    display: flex; 
-    align-items: center;
-    padding: 5px 15px; 
+    background: var(--card);
+    display: flex;
+    padding: 8px 16px;
     border-radius: 25px;
     border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
 input {
-    flex: 1; 
-    background: transparent; 
+    flex: 1;
+    background: transparent;
     border: none;
-    color: #fff; 
-    font-size: 16px; /* Prevents iOS from zooming in on input */
-    outline: none; 
-    padding: 10px;
+    color: #fff;
+    font-size: 16px; /* 16px prevents the annoying iOS auto-zoom */
+    outline: none;
 }
 
 button {
-    background: transparent; 
-    border: none; 
+    background: transparent;
+    border: none;
     color: var(--accent);
-    font-size: 1.2rem; 
-    cursor: pointer;
+    font-size: 1.4rem;
+    padding-left: 10px;
 }
+
+/* Bubbles */
+.bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; line-height: 1.4; font-size: 0.95rem; }
+.ai-msg { background: var(--card); align-self: flex-start; border-bottom-left-radius: 4px; }
+.user-msg { background: var(--accent); color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
