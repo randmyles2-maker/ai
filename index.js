@@ -7,9 +7,10 @@ class TRONetwork {
         this.init();
         this.loadSavedData();
         
+        // App Welcome
         window.addEventListener('load', () => {
             setTimeout(() => {
-                this.addMessage("TRO NETWORK: Intelligence link established. System standalone mode active.", "ai-msg");
+                this.addMessage("TRO NETWORK: Mobile node active on iPhone 12 architecture. Standing by.", "ai-msg");
             }, 500);
         });
     }
@@ -24,7 +25,7 @@ class TRONetwork {
         if (!val) return;
         this.addMessage(val, 'user-msg');
         this.input.value = '';
-        const loader = this.addMessage('Processing...', 'ai-msg');
+        const loader = this.addMessage('Syncing...', 'ai-msg');
         const res = await this.processQuery(val);
         loader.innerText = res;
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
@@ -32,14 +33,16 @@ class TRONetwork {
 
     async processQuery(q) {
         const query = q.toLowerCase();
+        // Math Detection
         if (/[0-9]/.test(query) && /[+\-*/]/.test(query)) {
-            try { return "RESULT: " + eval(query.replace(/[^-()\d/*+.]/g, '')); } catch(e) { return "MATH ERROR"; }
+            try { return "MATH: " + eval(query.replace(/[^-()\d/*+.]/g, '')); } catch(e) { return "MATH_ERR"; }
         }
+        // Literature/Wiki Search
         try {
             const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
             const data = await res.json();
-            return data.extract || "No direct data match found.";
-        } catch(e) { return "System offline or link failed."; }
+            return data.extract || "No data on TRO servers.";
+        } catch(e) { return "UPLINK_TIMEOUT"; }
     }
 
     saveData(text) {
@@ -51,14 +54,14 @@ class TRONetwork {
         }
     }
 
-    loadSavedData() { this.renderSaved(); }
-
     renderSaved() {
         const saved = JSON.parse(localStorage.getItem('tro_db') || '[]');
         this.savedList.innerHTML = saved.slice().reverse().map(item => 
-            `<div class="saved-item" onclick="alert('${item.replace(/'/g, "\\'")}')">${item.substring(0, 25)}...</div>`
+            `<div class="saved-item" onclick="alert('${item.replace(/'/g, "\\'")}')">${item.substring(0, 20)}...</div>`
         ).join('');
     }
+
+    loadSavedData() { this.renderSaved(); }
 
     addMessage(text, type) {
         const div = document.createElement('div');
@@ -71,9 +74,9 @@ class TRONetwork {
     }
 }
 
-// REGISTER SERVICE WORKER FOR INSTALLATION
+// Register for iPhone installation
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW failed", err));
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
 new TRONetwork();
