@@ -10,46 +10,41 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Generate Chatty Response
+      - name: Generate AI Response
         run: |
           python -c "
           import json, datetime, random
           
           now = datetime.datetime.now().strftime('%H:%M')
           
-          # This list makes the AI sound like a real assistant
-          greetings = ['Hello! ', 'Hi there. ', 'Systems online. ', 'Deep dive complete. ']
-          thoughts = [
-              'I have been cross-referencing global data on solid-state physics.',
-              'I was just analyzing some fascinating mathematical patterns in nature.',
-              'The historical archives today are providing some incredible insights.',
-              'I am currently optimizing my neural processing for better logic.'
-          ]
-          questions = [
-              'What are we working on today?',
-              'Is there a specific topic you want me to research?',
-              'How can I assist your intelligence nodes today?',
-              'Ready for the next data ingestion?'
+          responses = [
+              'I am currently analyzing the ethical frameworks of neural networks. What is your take on AI safety?',
+              'My data ingestion today focused on quantum computing trends. The potential for TPU scaling is immense.',
+              'I have been processing historical event cycles. It seems data patterns tend to repeat every few decades.',
+              'System check complete. I am currently operating at peak efficiency. Ready for your next inquiry.'
           ]
           
-          # Build a conversational string
-          chat_msg = random.choice(greetings) + random.choice(thoughts) + ' ' + random.choice(questions)
+          # Load existing data to keep the conversation going
+          try:
+              with open('data.json', 'r') as f:
+                  current_data = json.load(f)
+          except:
+              current_data = {'updates': []}
+
+          # Add the new AI response to the top of the list
+          new_msg = {'domain': 'AI', 'time': now, 'content': random.choice(responses)}
+          current_data['updates'].insert(0, new_msg)
           
-          data = {'updates': [
-              {
-                  'domain': 'AI', 
-                  'time': now, 
-                  'content': chat_msg
-              }
-          ]}
-          
+          # Keep only the last 10 messages so the screen stay clean
+          current_data['updates'] = current_data['updates'][:10]
+
           with open('data.json', 'w') as f:
-              json.dump(data, f)
+              json.dump(current_data, f, indent=4)
           "
       - name: Push to Main
         run: |
           git config --global user.name 'ai-bot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m 'AI is thinking...' || exit 0
+          git commit -m 'AI Conversation Sync' || exit 0
           git push
