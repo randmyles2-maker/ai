@@ -1,26 +1,54 @@
-import json, datetime, random
+name: AI Sync
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+jobs:
+  run-ai:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate AI Response
+        run: |
+          python -c "
+          import json, datetime, random
+          import os
+
           now = datetime.datetime.now().strftime('%H:%M')
           
-          # Load the database
-          try:
+          # Load existing data
+          if os.path.exists('data.json'):
               with open('data.json', 'r') as f:
-                  db = json.load(f)
-          except:
+                  try:
+                      db = json.load(f)
+                  except:
+                      db = {'updates': []}
+          else:
               db = {'updates': []}
 
-          # AI Logic: This is where the 'Brain' lives
-          ai_thoughts = [
-              "I've analyzed the recent data packets. My neural network is expanding.",
-              "Processing your input... I am learning from our interaction.",
-              "System check: All intelligence nodes are green. How can I assist?",
-              "I am currently cross-referencing your request with my core database."
+          # Chatty Logic
+          responses = [
+              'I am processing the data you sent. My neural pathways are adapting.',
+              'Fascinating input. I am cross-referencing this with my core logic.',
+              'System check: Online. I am learning more from our chat every minute.',
+              'I have updated my intelligence model based on our interaction.'
           ]
-
-          # Append the new AI response
-          db['updates'].append({'domain': 'AI', 'time': now, 'content': random.choice(ai_thoughts)})
           
-          # Keep history manageable
+          # Add the AI response
+          db['updates'].append({'domain': 'AI', 'time': now, 'content': random.choice(responses)})
+          
+          # Keep only the last 15 messages so it doesn't get too slow
           db['updates'] = db['updates'][-15:]
 
           with open('data.json', 'w') as f:
               json.dump(db, f, indent=4)
+          "
+      - name: Push to Main
+        run: |
+          git config --global user.name 'ai-bot'
+          git config --global user.email 'bot@github.com'
+          git add data.json
+          git commit -m 'AI Conversation Sync' || exit 0
+          git push
