@@ -1,65 +1,73 @@
-// Rule 3: Ethics & Right vs Wrong
-const FORBIDDEN = ["hurt", "steal", "illegal", "dangerous", "hack", "kill"];
+let knowledge = {};
 
-// Rule 1 & 6: Knowledge Base
-const FACTS = {
-    "gravity": "Gravity is the force that pulls objects toward each other. It keeps us on the ground and planets in orbit.",
-    "history": "History is the study of past events, helping us understand cause and effect to make better future decisions.",
-    "science": "Science is the systematic study of the structure and behavior of the physical world through observation.",
-    "ai": "AI needs high-quality data, robust algorithms, and powerful infrastructure like GPUs to function.",
-    "ethics": "AI ethics ensure technology is fair, transparent, and avoids causing harm to people."
-};
+// 1. Load Knowledge from GitHub Folders
+async function initializeKnowledge() {
+    const categories = ["math", "science", "technology", "socialMedia", "history", "general"];
+    for (let cat of categories) {
+        try {
+            const res = await fetch(`knowledge/${cat}.json`);
+            knowledge[cat] = await res.json();
+        } catch (e) {
+            console.log(`Missing file: ${cat}.json`);
+            knowledge[cat] = []; // Fallback to empty if file doesn't exist yet
+        }
+    }
+}
 
-function getResponse(input) {
+// 2. The Smart Search Brain
+function getAIResponse(input) {
     const q = input.toLowerCase().trim();
 
     // Rule 3: Ethics Filter
-    if (FORBIDDEN.some(word => q.includes(word))) {
-        return "I cannot fulfill this request. I am programmed to follow ethical guidelines that prioritize safety and avoid harm.";
+    const forbidden = ["hurt", "steal", "illegal", "dangerous"];
+    if (forbidden.some(word => q.includes(word))) {
+        return "I cannot assist with that request. I am programmed to be safe and ethical.";
     }
 
-    // Rule 1: Math Logic (Cause and Effect)
+    // Rule: Live Date/Time
+    if (q.includes("date") || q.includes("today")) {
+        return "Today is " + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    // Search through your JSON files
+    let matches = [];
+    for (let cat in knowledge) {
+        let found = knowledge[cat].filter(f => f.fact.toLowerCase().includes(q));
+        if (found.length > 0) matches.push(...found);
+    }
+
+    if (matches.length > 0) {
+        // Return the best match found in your files
+        return matches[0].fact;
+    }
+
+    // Rule 1: Math Fallback
     const mathClean = q.replace(/x/g, '*').replace(/[^0-9+\-*/(). ]/g, '');
     if (mathClean.length > 0 && /[+\-*/]/.test(mathClean)) {
-        try {
-            return "Based on mathematical logic, the result is: " + eval(mathClean);
-        } catch (e) {
-            return "I tried to calculate that, but the math expression is invalid.";
-        }
-    }
-
-    // Rule 2: Human Feelings & Communication
-    if (q.includes("sad") || q.includes("struggle") || q.includes("feel")) {
-        return "I understand that humans have complex feelings and goals. While I don't have emotions, I can offer a respectful space to discuss topics or provide helpful information.";
-    }
-
-    // Rule 1: Science & History Facts
-    for (let key in FACTS) {
-        if (q.includes(key)) return FACTS[key];
+        try { return "The result is: " + eval(mathClean); } catch(e) {}
     }
 
     // Rule 4: Admitting Limits
-    if (q.length < 2) return "I need a bit more information to give a helpful answer.";
-
-    // Rule 5: Adaptation (Fallback)
-    return "I've processed your message. I am still learning and adapting, but I can help you with math, science facts, or explaining AI principles!";
+    return "I don't have that specific fact in my database yet. I am still learning and adapting!";
 }
 
-function sendMsg() {
+// 3. UI Coordination
+async function sendMsg() {
     const input = document.getElementById('user-input');
     const container = document.getElementById('chat-container');
     const val = input.value.trim();
-
     if (!val) return;
 
-    // Add User Message
     container.innerHTML += `<div class="msg user">${val}</div>`;
     input.value = "";
 
-    // Rule 6: Practical Usefulness (Timed Response)
+    const reply = getAIResponse(val);
+    
     setTimeout(() => {
-        const reply = getResponse(val);
         container.innerHTML += `<div class="msg ai">${reply}</div>`;
         container.scrollTop = container.scrollHeight;
-    }, 400);
+    }, 300);
 }
+
+// Startup
+initializeKnowledge();
