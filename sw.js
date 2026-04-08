@@ -1,10 +1,7 @@
 const cacheName = 'tro-v2';
-const assets = ['./', './index.html', './index.css', './index.js', './manifest.json'];
-
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(cacheName).then(cache => cache.addAll(assets)));
+  e.waitUntil(caches.open(cacheName).then(cache => cache.addAll(['./', './index.html', './index.css', './index.js', './manifest.json'])));
 });
-
 self.addEventListener('fetch', e => {
   e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
 });
