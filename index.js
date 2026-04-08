@@ -3,80 +3,64 @@ class TRONetwork {
         this.chatFlow = document.getElementById('chat-flow');
         this.input = document.getElementById('user-query');
         this.btn = document.getElementById('send-btn');
-        this.savedList = document.getElementById('saved-list');
+        this.photoInput = document.getElementById('photo-input');
         this.init();
-        this.loadSavedData();
-        
-        // App Welcome
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                this.addMessage("TRO NETWORK: Mobile node active on iPhone 12 architecture. Standing by.", "ai-msg");
-            }, 500);
-        });
     }
 
     init() {
         this.btn.onclick = () => this.handleInput();
-        this.input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); this.handleInput(); } };
+        this.input.onkeydown = (e) => { if (e.key === 'Enter') this.handleInput(); };
+        
+        // Handle Photo Upload
+        this.photoInput.onchange = (e) => this.handlePhoto(e);
     }
 
-    async handleInput() {
+    handleInput() {
         const val = this.input.value.trim();
         if (!val) return;
         this.addMessage(val, 'user-msg');
         this.input.value = '';
-        const loader = this.addMessage('Syncing...', 'ai-msg');
-        const res = await this.processQuery(val);
-        loader.innerText = res;
-        this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
+        
+        // AI Response Logic
+        setTimeout(() => {
+            this.addMessage("TRO System: Command received and logged.", "ai-msg");
+        }, 600);
     }
 
-    async processQuery(q) {
-        const query = q.toLowerCase();
-        // Math Detection
-        if (/[0-9]/.test(query) && /[+\-*/]/.test(query)) {
-            try { return "MATH: " + eval(query.replace(/[^-()\d/*+.]/g, '')); } catch(e) { return "MATH_ERR"; }
-        }
-        // Literature/Wiki Search
-        try {
-            const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
-            const data = await res.json();
-            return data.extract || "No data on TRO servers.";
-        } catch(e) { return "UPLINK_TIMEOUT"; }
-    }
-
-    saveData(text) {
-        let saved = JSON.parse(localStorage.getItem('tro_db') || '[]');
-        if (!saved.includes(text)) {
-            saved.push(text);
-            localStorage.setItem('tro_db', JSON.stringify(saved));
-            this.renderSaved();
+    handlePhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imgTag = `<img src="${e.target.result}" class="chat-img">`;
+                this.addMessage(imgTag, 'user-msg', true);
+            };
+            reader.readAsDataURL(file);
         }
     }
 
-    renderSaved() {
-        const saved = JSON.parse(localStorage.getItem('tro_db') || '[]');
-        this.savedList.innerHTML = saved.slice().reverse().map(item => 
-            `<div class="saved-item" onclick="alert('${item.replace(/'/g, "\\'")}')">${item.substring(0, 20)}...</div>`
-        ).join('');
-    }
-
-    loadSavedData() { this.renderSaved(); }
-
-    addMessage(text, type) {
+    addMessage(content, type, isHTML = false) {
         const div = document.createElement('div');
         div.className = `bubble ${type}`;
-        div.innerText = text;
-        if(type === 'ai-msg') div.onclick = () => this.saveData(text);
+        
+        if (isHTML) {
+            div.innerHTML = content;
+        } else {
+            div.innerText = content;
+        }
+
         this.chatFlow.appendChild(div);
-        this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
+        
+        // Forced scroll to bottom
+        setTimeout(() => {
+            this.chatFlow.scrollTo({
+                top: this.chatFlow.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 50);
+        
         return div;
     }
-}
-
-// Register for iPhone installation
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
 new TRONetwork();
