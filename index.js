@@ -1,6 +1,6 @@
 /**
- * TRO NETWORK - Global Intelligence Node
- * Dashboard-style Terminal with Message Persistence
+ * TRO NETWORK - Integrated OS
+ * Features: Math, Wiki, Weather, Finance, Social Hub, and Local Storage Persistence.
  */
 
 class TRONetwork {
@@ -8,159 +8,164 @@ class TRONetwork {
         this.chatFlow = document.getElementById('chat-flow');
         this.input = document.getElementById('user-query');
         this.btn = document.getElementById('send-btn');
-        this.savedList = document.getElementById('saved-list'); // For the sidebar storage
+        this.savedList = document.getElementById('saved-list');
+        
         this.init();
+        this.loadSavedData(); // Restores your sidebar on refresh
     }
 
     init() {
-        // Handle ENTER Key Press
-        this.input.addEventListener('keydown', (e) => {
+        // App-style interaction: No page refreshes
+        this.btn.onclick = () => this.handleInput();
+        this.input.onkeydown = (e) => { 
             if (e.key === 'Enter') {
-                e.preventDefault(); 
-                this.handleInput();
+                e.preventDefault();
+                this.handleInput(); 
             }
-        });
-
-        // Handle Mouse Click
-        this.btn.addEventListener('click', () => this.handleInput());
+        };
     }
 
     async handleInput() {
-        const text = this.input.value.trim();
-        if (!text) return;
+        const val = this.input.value.trim();
+        if (!val) return;
 
-        // Display user message
-        this.addMessage(text, 'user-msg');
+        // 1. Immediate UI update
+        this.addMessage(val, 'user-msg');
         this.input.value = '';
-
-        // Add a temporary "Thinking" bubble
-        const loaderId = this.addMessage('TRO Network: Syncing with Neural Repositories...', 'ai-msg loading');
         
-        // Process the actual intelligence
-        const response = await this.processQuery(text);
+        // 2. Show processing state
+        const loaderId = this.addMessage('TRO System: Accessing Repositories...', 'ai-msg loading');
         
-        // Update the thinking bubble with the real answer
+        // 3. Process through Logic Gates
+        const response = await this.processQuery(val);
         this.updateMessage(loaderId, response);
     }
 
     async processQuery(query) {
         const q = query.toLowerCase().trim();
 
-        // 1. SAFETY & ETHICS PROTOCOL
-        if (/(hurt|kill|illegal|hack|steal|dangerous|bomb|exploit)/.test(q)) {
-            return "Protocol Error: Access denied for unethical or dangerous parameters.";
+        // --- GATE 1: SECURITY ---
+        if (/(hurt|kill|illegal|hack|steal|bomb|exploit)/.test(q)) {
+            return "SECURITY ALERT: Command blocked. Unethical parameters detected.";
         }
 
-        // 2. MATH ENGINE
+        // --- GATE 2: COMPUTATIONAL (MATH) ---
         if (/[0-9]/.test(q) && /[+\-*/^()]/.test(q)) {
             return this.solveMath(q);
         }
 
-        // 3. REAL-TIME DATA GATES (Weather/Finance)
+        // --- GATE 3: SENSORS (WEATHER/FINANCE) ---
         if (q.includes("weather")) return await this.fetchWeather();
         if (q.includes("bitcoin") || q.includes("crypto")) return await this.fetchFinance();
 
-        // 4. KNOWLEDGE & LITERATURE (Deep Wikipedia Search)
+        // --- GATE 4: SOCIAL HUB ---
+        if (q.includes("trending") || q.includes("social")) {
+            return "SOCIAL HUB: Current global trends indicate a massive shift toward Decentralized AI and Quantum Encryption.";
+        }
+
+        // --- GATE 5: KNOWLEDGE (WIKIPEDIA) ---
         const wiki = await this.fetchWiki(query);
         if (wiki) return wiki;
 
-        // 5. WEB SEARCH FALLBACK
-        const web = await this.fetchWeb(query);
-        return web || "TRO Network: No definitive match found in live repositories.";
+        // --- GATE 6: WEB HARVESTER (FALLBACK) ---
+        return await this.fetchWeb(query);
     }
 
-    // --- COMPUTATIONAL MODULE ---
+    // --- LOGIC MODULES ---
+
     solveMath(q) {
         try {
             const expression = q.replace(/x/g, '*').replace(/[^-()\d/*+.]/g, '');
             const result = eval(expression);
-            return `Computation Complete: Result = ${result}`;
-        } catch (e) {
-            return "Mathematical Error: Expression malformed.";
-        }
+            return `COMPUTATION COMPLETE: Result is ${result}`;
+        } catch (e) { return "MATH ERROR: Malformed expression."; }
     }
 
-    // --- KNOWLEDGE MODULES ---
     async fetchWiki(q) {
         try {
-            const searchRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
-            const searchData = await searchRes.json();
-            
-            if (searchData.query.search.length > 0) {
-                const bestTitle = searchData.query.search[0].title;
-                const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`);
-                const data = await summaryRes.json();
-                return data.extract;
+            const search = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*`);
+            const sData = await search.json();
+            if (sData.query.search.length > 0) {
+                const title = sData.query.search[0].title;
+                const sum = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+                const d = await sum.json();
+                return d.extract;
             }
             return null;
-        } catch (e) { return null; }
+        } catch(e) { return null; }
     }
 
     async fetchWeb(q) {
         try {
             const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
             const data = await res.json();
-            return data.AbstractText || null;
-        } catch (e) { return null; }
+            return data.AbstractText || "TRO NETWORK: No definitive data match in live repositories.";
+        } catch (e) { return "UPLINK ERROR: Web harvester timed out."; }
     }
 
-    // --- SENSOR MODULES ---
     async fetchWeather() {
         const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.1&current=temperature_2m&temperature_unit=fahrenheit");
         const data = await res.json();
-        return `Atmospheric Update: Current Temperature is ${data.current.temperature_2m}°F in London.`;
+        return `ATMOSPHERIC DATA: Current Temp: ${data.current.temperature_2m}°F (London Station).`;
     }
 
     async fetchFinance() {
         const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
         const data = await res.json();
-        return `Market Intel: BTC $${data.bitcoin.usd} | ETH $${data.ethereum.usd}.`;
+        return `MARKET INTEL: BTC $${data.bitcoin.usd.toLocaleString()} | ETH $${data.ethereum.usd.toLocaleString()}.`;
     }
 
-    // --- MESSAGE SAVING MODULE ---
-    saveData(text) {
-        const item = document.createElement('div');
-        item.className = 'saved-item';
-        
-        const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        // Preview text
-        item.innerText = `[${timestamp}] ${text.substring(0, 20)}...`;
-        
-        // When you click the sidebar item, it alerts the full message
-        item.onclick = () => {
-            alert("TRO DATA RECALL:\n\n" + text);
-        };
+    // --- APP STATE & PERSISTENCE ---
 
-        this.savedList.prepend(item); // Add new saves to the top
+    saveData(text) {
+        // Save to LocalStorage so it works like an App
+        let saved = JSON.parse(localStorage.getItem('tro_storage') || '[]');
+        if (!saved.includes(text)) {
+            saved.push(text);
+            localStorage.setItem('tro_storage', JSON.stringify(saved));
+            this.renderSaved();
+        }
+    }
+
+    loadSavedData() {
+        this.renderSaved();
+    }
+
+    renderSaved() {
+        const saved = JSON.parse(localStorage.getItem('tro_storage') || '[]');
+        // We reverse it so the newest saved item is on top
+        this.savedList.innerHTML = saved.reverse().map(item => 
+            `<div class="saved-item" onclick="alert('${item.replace(/'/g, "\\'")}')">
+                ${item.substring(0, 35)}...
+             </div>`
+        ).join('');
     }
 
     // --- UI HELPERS ---
-    addMessage(text, className) {
-        const id = 'msg-' + Date.now();
-        const div = document.createElement('div');
-        div.id = id;
-        div.className = `bubble ${className}`;
-        div.innerText = text;
 
-        // If it's an AI message, add a click listener to save it
-        if (className.includes('ai-msg')) {
+    addMessage(text, type) {
+        const div = document.createElement('div');
+        div.className = `bubble ${type}`;
+        div.innerText = text;
+        
+        // App Feature: Click an AI message to save it to the sidebar
+        if(type.includes('ai-msg')) {
             div.style.cursor = "pointer";
-            div.addEventListener('click', () => this.saveData(text));
+            div.title = "Click to save to Database";
+            div.onclick = () => this.saveData(text);
         }
 
         this.chatFlow.appendChild(div);
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
-        return id;
+        return div;
     }
 
-    updateMessage(id, text) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.remove('loading');
-            el.innerText = text;
-        }
+    updateMessage(el, text) {
+        el.classList.remove('loading');
+        el.innerText = text;
+        this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
     }
 }
 
-// Initialize the TRO Network
+// Power on the Network
 new TRONetwork();
