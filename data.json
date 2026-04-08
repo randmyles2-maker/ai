@@ -14,6 +14,11 @@
             "role": "ai",
             "text": "I have ingested your data and added it to my knowledge base. Ask me a math problem!",
             "t": 1775616957689
+        },
+        {
+            "role": "ai",
+            "text": "The answer is: 48",
+            "t": 1775617203629
         }
     ]
 }
