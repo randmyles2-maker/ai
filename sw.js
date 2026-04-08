@@ -1,4 +1,4 @@
-const cacheName = 'tro-v1';
+const cacheName = 'tro-v2';
 const assets = ['./', './index.html', './index.css', './index.js', './manifest.json'];
 
 self.addEventListener('install', e => {
