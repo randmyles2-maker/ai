@@ -7,7 +7,7 @@ class TRONetwork {
         this.init();
         
         window.addEventListener('load', () => {
-            this.addMessage("TRO UPLINK STABLE. READY FOR COMMAND.", "ai-msg");
+            this.addMessage("TRO UPLINK STABLE. SYSTEM READY.", "ai-msg");
         });
     }
 
@@ -17,15 +17,32 @@ class TRONetwork {
         this.photoInput.onchange = (e) => this.handlePhoto(e);
     }
 
-    handleInput() {
+    async handleInput() {
         const val = this.input.value.trim();
         if (!val) return;
+
         this.addMessage(val, 'user-msg');
         this.input.value = '';
         
-        setTimeout(() => {
-            this.addMessage("COMMAND RECEIVED. PROCESSING...", "ai-msg");
-        }, 800);
+        // Show initial loading state
+        const responseBubble = this.addMessage("ANALYZING...", "ai-msg");
+        
+        // Actually fetch data
+        const result = await this.query(val);
+        
+        // Update the SAME bubble with the real answer
+        responseBubble.innerText = result;
+        this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
+    }
+
+    async query(q) {
+        try {
+            const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+            const data = await res.json();
+            return data.extract || "Command recognized but no external data found.";
+        } catch(e) {
+            return "ERROR: Uplink interrupted.";
+        }
     }
 
     handlePhoto(event) {
@@ -46,6 +63,7 @@ class TRONetwork {
         this.chatFlow.appendChild(div);
         
         this.chatFlow.scrollTop = this.chatFlow.scrollHeight;
+        return div; // Return the element so we can update it later
     }
 }
 new TRONetwork();
