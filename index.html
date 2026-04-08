@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Autonomous Node</title>
+    <title>Core Intelligence Node</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div id="app">
+    <div id="ai-shell">
         <header>
-            <div class="status-dot"></div>
-            <h1>AI NODE: ACTIVE</h1>
-            <p>Real-Time Neural Link Online</p>
+            <div class="brand">
+                <span class="pulse-icon"></span>
+                <h1>AURA <small>v3.0 Live</small></h1>
+            </div>
+            <div id="system-status">Sourcing: Web, Wiki, Satellite</div>
         </header>
 
-        <div id="chat-window">
-            <div class="msg ai">System Online. All live data modules (Google, Wiki, Weather, Crypto) are synchronized. How can I assist?</div>
-        </div>
+        <main id="chat-flow">
+            <div class="bubble ai-msg">Neural Link Established. System is operating at peak capacity. How can I assist you?</div>
+        </main>
 
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Query the live web or local logic..." onkeypress="if(event.key === 'Enter') sendMsg()">
-            <button onclick="sendMsg()">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+        <footer class="input-container">
+            <input type="text" id="user-query" placeholder="Enter query..." autocomplete="off">
+            <button id="send-btn">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
             </button>
-        </div>
+        </footer>
     </div>
     <script src="index.js"></script>
 </body>
