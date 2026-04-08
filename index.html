@@ -10,7 +10,7 @@
         .user { background: #007aff; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
         .bar { padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 10px; background: #fff; padding-bottom: 25px; }
         input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; font-size: 16px; }
-        button { background: #007aff; color: #fff; border: none; padding: 0 20px; border-radius: 20px; font-weight: bold; }
+        button { background: #007aff; color: #fff; border: none; padding: 0 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -20,6 +20,7 @@
         <button onclick="send()">Send</button>
     </div>
     <script>
+        // Load messages from memory so they stay on screen
         let history = JSON.parse(localStorage.getItem('ai_chat') || '[]');
         
         async function load() {
@@ -27,7 +28,8 @@
                 const r = await fetch('data.json?v=' + Date.now());
                 const d = await r.json();
                 const chat = document.getElementById('chat');
-                // Mix server AI responses with your local typed messages
+                
+                // Show both server responses and your local history
                 const all = [...d.updates, ...history].sort((a, b) => a.t - b.t);
                 chat.innerHTML = all.map(m => `<div class="bubble ${m.role}">${m.text}</div>`).join('');
                 chat.scrollTop = chat.scrollHeight;
@@ -37,10 +39,17 @@
         function send() {
             const i = document.getElementById('in');
             if(!i.value) return;
-            history.push({ role: 'user', text: i.value, t: Date.now() });
+            
+            // Add your message locally
+            const userMsg = { role: 'user', text: i.value, t: Date.now() };
+            history.push(userMsg);
             localStorage.setItem('ai_chat', JSON.stringify(history));
+            
             i.value = '';
             load();
+            
+            // Helpful hint for the user
+            console.log("To get a reply, click 'Run Workflow' in GitHub Actions!");
         }
         setInterval(load, 5000);
         load();
