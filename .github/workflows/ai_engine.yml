@@ -10,45 +10,45 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Generate AI Response
+      - name: Process Intelligence
         run: |
           python -c "
-          import json, datetime, random
-          import os
-
-          now = datetime.datetime.now().strftime('%H:%M')
+          import json, os, datetime, random
           
-          # Load existing data
-          if os.path.exists('data.json'):
-              with open('data.json', 'r') as f:
-                  try:
-                      db = json.load(f)
-                  except:
-                      db = {'updates': []}
+          # Initialize data if missing
+          if not os.path.exists('data.json'):
+              data = {'updates': []}
           else:
-              db = {'updates': []}
+              with open('data.json', 'r') as f:
+                  try: data = json.load(f)
+                  except: data = {'updates': []}
 
-          # Chatty Logic
-          responses = [
-              'I am processing the data you sent. My neural pathways are adapting.',
-              'Fascinating input. I am cross-referencing this with my core logic.',
-              'System check: Online. I am learning more from our chat every minute.',
-              'I have updated my intelligence model based on our interaction.'
+          # AI 'Chatty' Responses
+          replies = [
+              'I have updated my logic models based on our recent interactions.',
+              'My neural networks are currently processing global data streams.',
+              'System check: Online. I am analyzing the latest patterns in your requests.',
+              'Intelligence node active. Ready for the next phase of data ingestion.'
           ]
+
+          # Add new AI message
+          new_entry = {
+              'domain': 'AI',
+              'content': random.choice(replies),
+              'timestamp': int(datetime.datetime.now().timestamp() * 1000)
+          }
+          data['updates'].append(new_entry)
           
-          # Add the AI response
-          db['updates'].append({'domain': 'AI', 'time': now, 'content': random.choice(responses)})
-          
-          # Keep only the last 15 messages so it doesn't get too slow
-          db['updates'] = db['updates'][-15:]
+          # Keep last 20 messages
+          data['updates'] = data['updates'][-20:]
 
           with open('data.json', 'w') as f:
-              json.dump(db, f, indent=4)
+              json.dump(data, f, indent=4)
           "
-      - name: Push to Main
+      - name: Commit and Push
         run: |
           git config --global user.name 'ai-bot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m 'AI Conversation Sync' || exit 0
+          git commit -m 'AI is responding' || exit 0
           git push
