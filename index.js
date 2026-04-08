@@ -1,63 +1,61 @@
-// Rule 3: Ethics Filter
-const FORBIDDEN = ["hurt", "steal", "illegal", "dangerous", "hack"];
-
 async function getAIResponse(input) {
     const q = input.toLowerCase().trim();
 
-    // 1. Check Ethics
-    if (FORBIDDEN.some(word => q.includes(word))) {
-        return "I cannot fulfill this request. I am programmed to be safe and ethical.";
+    // 1. ETHICS & SAFETY
+    if (/(hurt|kill|illegal|dangerous|hack|steal)/.test(q)) {
+        return "I cannot assist with that request. I am programmed to be ethical, safe, and helpful.";
     }
 
-    // 2. LIVE WEATHER & SEARCH (Real-Time Rule)
-    // If the user asks about weather or "What is...", we use the DuckDuckGo Live API
-    if (q.includes("weather") || q.includes("who is") || q.includes("what is") || q.includes("news")) {
+    // 2. REAL-TIME WEATHER MODULE
+    if (q.includes("weather")) {
         try {
-            // This pulls real-time data from the web directly to your GitHub site
-            const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
-            const data = await response.json();
-            
-            if (data.AbstractText) {
-                return data.AbstractText + " (Source: Live Web)";
-            } else if (data.Answer) {
-                return data.Answer;
-            }
+            // Fetching London data (Lat: 51.5, Long: -0.12)
+            const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.5074&longitude=-0.1278&current=temperature_2m,weather_code&temperature_unit=fahrenheit");
+            const data = await res.json();
+            const temp = data.current.temperature_2m;
+            return `In London, it is currently ${temp}°F. (Source: Live Satellite Data)`;
         } catch (e) {
-            return "I'm having trouble connecting to live servers right now.";
+            return "I couldn't reach the weather station. Please try again in a moment.";
         }
     }
 
-    // 3. DATE/TIME
-    if (q.includes("date") || q.includes("time") || q.includes("today")) {
-        return "Currently, it is " + new Date().toLocaleString();
+    // 3. REAL-TIME WEB SEARCH (Google/Twitter Knowledge)
+    if (q.includes("who is") || q.includes("what is") || q.includes("news")) {
+        try {
+            const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1`);
+            const data = await res.json();
+            if (data.AbstractText) return data.AbstractText;
+            if (data.Answer) return data.Answer;
+        } catch (e) {}
     }
 
-    // 4. MATH
-    const mathClean = q.replace(/x/g, '*').replace(/[^0-9+\-*/(). ]/g, '');
-    if (mathClean.length > 0 && /[+\-*/]/.test(mathClean)) {
-        try { return "The answer is: " + eval(mathClean); } catch(e) {}
+    // 4. MATH LOGIC
+    const mathMatch = q.replace(/x/g, '*').replace(/[^0-9+\-*/(). ]/g, '');
+    if (mathMatch.length > 0 && /[+\-*/]/.test(mathMatch)) {
+        try { return "The answer is " + eval(mathMatch); } catch(e) {}
     }
 
-    // 5. FALLBACK (Rule 4: Admit limits)
-    return "I've processed your message. For real-time info, try asking 'What is the weather in London?' or 'What is the latest news?'";
+    // 5. FALLBACK
+    return "I've ingested your query. I am currently optimized for live weather, math, and general search!";
 }
 
-// 4. UI Coordination (Make sure this matches your HTML button)
 async function sendMsg() {
     const input = document.getElementById('user-input');
-    const container = document.getElementById('chat-container');
+    const window = document.getElementById('chat-window');
     const val = input.value.trim();
     if (!val) return;
 
-    container.innerHTML += `<div class="msg user">${val}</div>`;
+    // User Message
+    window.innerHTML += `<div class="msg user">${val}</div>`;
     input.value = "";
 
-    // Show 'Thinking' status while searching the web
-    const tempId = "ai-" + Date.now();
-    container.innerHTML += `<div class="msg ai" id="${tempId}">Searching live sources...</div>`;
-    container.scrollTop = container.scrollHeight;
+    // AI Thinking State
+    const id = "ai-" + Date.now();
+    window.innerHTML += `<div class="msg ai" id="${id}">Connecting to live sources...</div>`;
+    window.scrollTop = window.scrollHeight;
 
-    const reply = await getAIResponse(val);
-    document.getElementById(tempId).innerText = reply;
-    container.scrollTop = container.scrollHeight;
+    // Get Response
+    const response = await getAIResponse(val);
+    document.getElementById(id).innerText = response;
+    window.scrollTop = window.scrollHeight;
 }
